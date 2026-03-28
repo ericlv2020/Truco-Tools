@@ -679,7 +679,7 @@ const AIRTABLE_CONFIG = {
       const f = r.fields;
       const stage = f['Stage'] || '';
       const val = f['Total Quoted Value'] || 0;
-      const prob = f['Probability (%)'] || 0;
+      const prob = Math.round((f['Probability (%)'] || 0) * 100);
       const closure = f['Expected Closure Date'] ? fmtDate(f['Expected Closure Date']) : '—';
       const closureClass = closureDateClass(f['Expected Closure Date']);
       const nextAction = f['Next Action'] || '—';
@@ -842,6 +842,7 @@ const AIRTABLE_CONFIG = {
 
   function getPanelValue(key, f) {
     const val = f[key];
+    if (key === 'Probability (%)') return val != null ? Math.round(val * 100) + '%' : null;
     if (key === 'Account') {
       if (!f['Account'] || !f['Account'].length) return null;
       return accountMap[f['Account'][0]] || f['Account'][0];
