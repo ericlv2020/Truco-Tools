@@ -5,7 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TI — Deal Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="config.js"></script>
+<script>
+const AIRTABLE_CONFIG = {
+  apiKey: "REDACTED",
+  baseId: "appFms83tvOuiMDsA",
+  tables: {
+    opportunities: "Opportunities",
+    quotes: "Quotes",
+    accounts: "Accounts",
+    orders: "Orders"
+  }
+};
+</script>
 <style>
   :root {
     --bg: #0d0f0e;
