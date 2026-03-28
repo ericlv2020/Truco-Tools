@@ -525,6 +525,7 @@ const AIRTABLE_CONFIG = {
 
 <script>
   let allQuotes = [];
+  let accountMap = {};
   let currentFilter = 'all';
   let searchTerm = '';
   let sortField = 'Quote Date';
@@ -555,7 +556,13 @@ const AIRTABLE_CONFIG = {
     document.getElementById('tableWrap').innerHTML =
       '<div class="state-msg"><span class="spinner"></span> Loading quotes...</div>';
     try {
-      allQuotes = await fetchTable(AIRTABLE_CONFIG.tables.quotes);
+      const [quoteRecords, accountRecords] = await Promise.all([
+        fetchTable(AIRTABLE_CONFIG.tables.quotes),
+        fetchTable(AIRTABLE_CONFIG.tables.accounts)
+      ]);
+      accountMap = {};
+      accountRecords.forEach(r => { accountMap[r.id] = r.fields['Name'] || r.fields['Account Name'] || r.id; });
+      allQuotes = quoteRecords;
       renderKPIs();
       renderTable();
       const now = new Date();
@@ -731,8 +738,8 @@ const AIRTABLE_CONFIG = {
 
   // ── HELPERS ────────────────────────────────────────────
   function accountName(f) {
-    if (!f['Account']) return '—';
-    return Array.isArray(f['Account']) ? f['Account'][0] : f['Account'];
+    if (!f['Account'] || !f['Account'].length) return '—';
+    return accountMap[f['Account'][0]] || f['Account'][0];
   }
 
   function fmtUSD(v) {

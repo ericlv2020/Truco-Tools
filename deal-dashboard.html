@@ -507,6 +507,7 @@ const AIRTABLE_CONFIG = {
   // ── STATE ──────────────────────────────────────────────
   let allOpps = [];
   let allQuotes = [];
+  let accountMap = {};
   let oppFilter = 'all';
   let quoteFilter = 'all';
 
@@ -538,10 +539,14 @@ const AIRTABLE_CONFIG = {
   async function loadAll() {
     document.getElementById('lastUpdated').textContent = 'Refreshing...';
     try {
-      const [oppRecords, quoteRecords] = await Promise.all([
+      const [oppRecords, quoteRecords, accountRecords] = await Promise.all([
         fetchTable(AIRTABLE_CONFIG.tables.opportunities),
-        fetchTable(AIRTABLE_CONFIG.tables.quotes)
+        fetchTable(AIRTABLE_CONFIG.tables.quotes),
+        fetchTable(AIRTABLE_CONFIG.tables.accounts)
       ]);
+
+      accountMap = {};
+      accountRecords.forEach(r => { accountMap[r.id] = r.fields['Name'] || r.fields['Account Name'] || r.id; });
 
       allOpps = oppRecords;
       allQuotes = quoteRecords;
@@ -609,7 +614,7 @@ const AIRTABLE_CONFIG = {
       return `<tr>
         <td>
           <div class="opp-name">${esc(f['Opportunity Name'] || '—')}</div>
-          <div class="account-name">${esc(f['Account'] ? (Array.isArray(f['Account']) ? f['Account'][0] : f['Account']) : '—')}</div>
+          <div class="account-name">${esc(f['Account'] ? (accountMap[f['Account'][0]] || f['Account'][0]) : '—')}</div>
         </td>
         <td><span class="badge ${stageBadge(stage)}">${esc(stage) || '—'}</span></td>
         <td class="value ${val > 100000 ? 'high' : val > 20000 ? 'med' : ''}">${fmtUSD(val)}</td>
@@ -679,7 +684,7 @@ const AIRTABLE_CONFIG = {
       return `<tr>
         <td><span style="font-family:'DM Mono',monospace;font-size:12px;">${esc(f['Quote Number'] || '—')}</span></td>
         <td style="font-size:12px;color:var(--muted);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(f['RFQ Reference'] || '—')}</td>
-        <td style="font-size:12px;">${esc(f['Account'] ? (Array.isArray(f['Account']) ? f['Account'][0] : f['Account']) : '—')}</td>
+        <td style="font-size:12px;">${esc(f['Account'] ? (accountMap[f['Account'][0]] || f['Account'][0]) : '—')}</td>
         <td><span class="badge ${statusBadge(status)}">${esc(status) || '—'}</span></td>
         <td class="value ${val > 100000 ? 'high' : val > 20000 ? 'med' : ''}">${fmtUSD(val)}</td>
         <td style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">${esc(f['Product Category'] || '—')}</td>
