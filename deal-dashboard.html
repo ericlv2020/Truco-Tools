@@ -689,7 +689,6 @@ const AIRTABLE_CONFIG = {
       return `<tr class="clickable" onclick="openPanel('opp','${r.id}')">
         <td>
           <div class="opp-name">${esc(f['Opportunity Name'] || '—')}</div>
-          <div class="account-name">${esc(f['Account'] ? (accountMap[f['Account'][0]] || f['Account'][0]) : '—')}</div>
         </td>
         <td><span class="badge ${stageBadge(stage)}">${esc(stage) || '—'}</span></td>
         <td class="val-cell ${val > 100000 ? 'high' : val > 20000 ? 'med' : ''}">${fmtUSD(val)}</td>
