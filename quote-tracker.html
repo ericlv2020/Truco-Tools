@@ -278,11 +278,13 @@ const AIRTABLE_CONFIG = {
   }
 
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #f0ece4; }
+
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover td { background: #ebe7de; }
 
   /* ROW highlight for overdue */
   tr.row-overdue td { background: #fdf0f0; }
-  tr.row-overdue:hover td { background: #fae4e4; }
+  tr.row-overdue:hover td { background: #f5e4e4; }
 
   .quote-num {
     font-family: 'IBM Plex Mono', monospace;
@@ -429,11 +431,125 @@ const AIRTABLE_CONFIG = {
   th.sorted-asc .sort-indicator::after { content: '↑'; opacity: 1; }
   th.sorted-desc .sort-indicator::after { content: '↓'; opacity: 1; }
 
+  /* DETAIL PANEL */
+  #panelOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,22,18,0.35);
+    z-index: 200;
+    display: none;
+    cursor: pointer;
+  }
+
+  #detailPanel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 440px;
+    max-width: 100vw;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #detailPanel.open { transform: translateX(0); }
+
+  .panel-hd {
+    background: var(--accent);
+    color: white;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  .panel-hd-title {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: white;
+  }
+
+  .panel-hd-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a8d8b8;
+    margin-top: 4px;
+  }
+
+  .panel-close {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+
+  .panel-close:hover { background: rgba(255,255,255,0.25); }
+
+  .panel-body {
+    padding: 24px;
+    flex: 1;
+  }
+
+  .panel-field {
+    margin-bottom: 18px;
+  }
+
+  .panel-field-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    margin-bottom: 3px;
+  }
+
+  .panel-field-value {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.45;
+    word-break: break-word;
+  }
+
+  .panel-field-value.empty { color: var(--ink3); }
+
+  .panel-divider {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin: 24px 0 18px;
+  }
+
   @media (max-width: 900px) {
     .summary-row { grid-template-columns: repeat(3,1fr); }
     main { padding: 16px; }
     header { padding: 0 16px; }
     .search-input { width: 160px; }
+    #detailPanel { width: 100vw; }
   }
 </style>
 </head>
@@ -523,6 +639,19 @@ const AIRTABLE_CONFIG = {
 
 </main>
 
+<!-- DETAIL PANEL -->
+<div id="panelOverlay" onclick="closePanel()"></div>
+<div id="detailPanel" role="dialog" aria-modal="true">
+  <div class="panel-hd">
+    <div>
+      <div class="panel-hd-title" id="panelTitle">—</div>
+      <div class="panel-hd-sub" id="panelSub"></div>
+    </div>
+    <button class="panel-close" onclick="closePanel()" aria-label="Close">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
 <script>
   let allQuotes = [];
   let accountMap = {};
@@ -571,7 +700,7 @@ const AIRTABLE_CONFIG = {
     } catch (err) {
       document.getElementById('lastUpdated').textContent = 'Error';
       document.getElementById('tableWrap').innerHTML =
-        `<div class="error-msg">⚠ Failed to load: ${esc(err.message)}<br><br>Check your API key in config.js</div>`;
+        `<div class="error-msg">⚠ Failed to load: ${esc(err.message)}</div>`;
     }
   }
 
@@ -597,14 +726,14 @@ const AIRTABLE_CONFIG = {
     document.getElementById('kpiOverdue').textContent = overdue.length;
     document.getElementById('kpiAvgAge').textContent = avgAge;
 
-    const alert = document.getElementById('overdueAlert');
+    const alertEl = document.getElementById('overdueAlert');
     const alertText = document.getElementById('overdueAlertText');
     if (overdue.length > 0) {
-      alert.style.display = 'flex';
+      alertEl.style.display = 'flex';
       const names = overdue.slice(0,3).map(r => r.fields['Quote Number'] || '?').join(', ');
       alertText.innerHTML = `<strong>${overdue.length} quote${overdue.length > 1 ? 's' : ''} past follow-up date:</strong> ${esc(names)}${overdue.length > 3 ? ` and ${overdue.length - 3} more` : ''}. Action required.`;
     } else {
-      alert.style.display = 'none';
+      alertEl.style.display = 'none';
     }
   }
 
@@ -671,7 +800,7 @@ const AIRTABLE_CONFIG = {
 
       const displayStatus = outcome === 'Won' ? 'Won' : outcome === 'Lost' ? 'Lost' : status;
 
-      return `<tr class="${isOverdue ? 'row-overdue' : ''}">
+      return `<tr class="clickable${isOverdue ? ' row-overdue' : ''}" onclick="openPanel('${r.id}')">
         <td><span class="quote-num">${esc(f['Quote Number'] || '—')}</span></td>
         <td><span class="rfq-ref" title="${esc(f['RFQ Reference'] || '')}">${esc(f['RFQ Reference'] || '—')}</span></td>
         <td><span class="account">${esc(account)}</span></td>
@@ -734,6 +863,80 @@ const AIRTABLE_CONFIG = {
   function searchQuotes(val) {
     searchTerm = val;
     renderTable();
+  }
+
+  // ── DETAIL PANEL ───────────────────────────────────────
+  function openPanel(id) {
+    const record = allQuotes.find(r => r.id === id);
+    if (!record) return;
+
+    const f = record.fields;
+    document.getElementById('panelTitle').textContent = f['Quote Number'] || '—';
+    document.getElementById('panelSub').textContent = f['RFQ Reference'] ? 'Quote · ' + f['RFQ Reference'] : 'Quote';
+    document.getElementById('panelBody').innerHTML = renderPanelFields(f);
+    document.getElementById('panelOverlay').style.display = 'block';
+    document.getElementById('detailPanel').classList.add('open');
+  }
+
+  function closePanel() {
+    document.getElementById('panelOverlay').style.display = 'none';
+    document.getElementById('detailPanel').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+  function renderPanelFields(f) {
+    const primaryKeys = ['Quote Number','RFQ Reference','Account','Quote Status','Quoted Value','Active Quoted Value','Currency','Product Category','Quote Date','Follow-Up Date','Quote Age','Outcome','Internal Notes'];
+    const shownSet = new Set(primaryKeys);
+    const extraEntries = Object.keys(f).filter(k => !shownSet.has(k));
+
+    let html = primaryKeys
+      .filter(k => k in f || k === 'Account')
+      .map(k => panelField(k, getPanelValue(k, f)))
+      .join('');
+
+    if (extraEntries.length) {
+      html += `<div class="panel-divider">Additional Fields</div>`;
+      html += extraEntries.map(k => panelField(k, formatFieldValue(k, f[k]))).join('');
+    }
+
+    return html;
+  }
+
+  function getPanelValue(key, f) {
+    if (key === 'Account') {
+      if (!f['Account'] || !f['Account'].length) return null;
+      return accountMap[f['Account'][0]] || f['Account'][0];
+    }
+    return formatFieldValue(key, f[key]);
+  }
+
+  function formatFieldValue(key, val) {
+    if (val == null || val === '') return null;
+    if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+    if (Array.isArray(val)) {
+      if (!val.length) return null;
+      return val.map(v => (typeof v === 'string' ? (accountMap[v] || v) : String(v))).join(', ');
+    }
+    if (typeof val === 'number') {
+      const kl = key.toLowerCase();
+      if (kl.includes('value') || kl.includes('price') || kl.includes('amount')) return fmtUSD(val);
+      return val.toString();
+    }
+    if (typeof val === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}/.test(val)) return fmtDate(val);
+      return val;
+    }
+    return String(val);
+  }
+
+  function panelField(label, value) {
+    const empty = value == null || value === '';
+    const display = empty ? '—' : value;
+    return `<div class="panel-field">
+      <div class="panel-field-label">${esc(label)}</div>
+      <div class="panel-field-value${empty ? ' empty' : ''}">${esc(String(display))}</div>
+    </div>`;
   }
 
   // ── HELPERS ────────────────────────────────────────────
