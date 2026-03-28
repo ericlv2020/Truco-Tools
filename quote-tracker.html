@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TI — Quote Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;400;600;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #faf7f2;
+    --surface2: #ede8de;
+    --border: #d8d0c0;
+    --ink: #1a1612;
+    --ink2: #5a5248;
+    --ink3: #9a9288;
+    --accent: #1a3d2b;
+    --accent-light: #e8f0eb;
+    --gold: #b8860b;
+    --gold-light: #fdf5e0;
+    --red: #8b1a1a;
+    --red-light: #fde8e8;
+    --blue: #1a2d5a;
+    --blue-light: #e8ecf5;
+    --won-bg: #e8f5ee;
+    --won-fg: #1a5c35;
+    --lost-bg: #f5e8e8;
+    --lost-fg: #8b1a1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 0 36px;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    min-height: 64px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 0;
+  }
+
+  .wordmark {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+
+  .wordmark span {
+    color: #a8d8b8;
+    font-weight: 300;
+  }
+
+  .divider-v {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.2);
+  }
+
+  .page-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a8d8b8;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .last-updated {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .refresh-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .refresh-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* MAIN */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 28px 36px;
+  }
+
+  /* SUMMARY CARDS */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+
+  .card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    margin-bottom: 6px;
+  }
+
+  .card-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .card-value.accent { color: var(--accent); }
+  .card-value.gold   { color: var(--gold); }
+  .card-value.red    { color: var(--red); }
+  .card-value.won    { color: var(--won-fg); }
+
+  .card-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 4px;
+  }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 4px;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink2);
+    padding: 5px 13px;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--ink3); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .section-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+    margin-left: 8px;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead { background: var(--surface2); }
+
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink3);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  th:hover { color: var(--accent); }
+
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f0ece4; }
+
+  /* ROW highlight for overdue */
+  tr.row-overdue td { background: #fdf0f0; }
+  tr.row-overdue:hover td { background: #fae4e4; }
+
+  .quote-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .rfq-ref {
+    font-size: 12px;
+    color: var(--ink2);
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .account {
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .date-cell {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+    white-space: nowrap;
+  }
+
+  .date-cell.overdue { color: var(--red); font-weight: 500; }
+  .date-cell.soon    { color: var(--gold); font-weight: 500; }
+
+  .val-cell {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .val-cell.high { color: var(--accent); font-weight: 500; }
+  .val-cell.med  { color: var(--gold); }
+
+  .age-cell {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+    text-align: center;
+  }
+
+  .age-cell.stale { color: var(--red); }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .b-sent     { background: var(--accent-light); color: var(--accent); border: 1px solid #b8d8c4; }
+  .b-draft    { background: var(--surface2); color: var(--ink3); border: 1px solid var(--border); }
+  .b-won      { background: var(--won-bg); color: var(--won-fg); border: 1px solid #b8d8c4; }
+  .b-lost     { background: var(--lost-bg); color: var(--lost-fg); border: 1px solid #e8c0c0; }
+  .b-default  { background: var(--surface2); color: var(--ink3); border: 1px solid var(--border); }
+  .b-overdue  { background: var(--red-light); color: var(--red); border: 1px solid #e8c0c0; }
+  .b-victaulic { background: #eef2fa; color: var(--blue); border: 1px solid #c8d4ec; }
+  .b-dixon    { background: #fdf5e0; color: var(--gold); border: 1px solid #e8d8a0; }
+  .b-hose     { background: #f0f8f4; color: #2a6040; border: 1px solid #b8d8c4; }
+
+  /* OVERDUE ALERT BOX */
+  .alert-box {
+    background: var(--red-light);
+    border: 1px solid #e8c0c0;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .alert-icon { font-size: 18px; }
+
+  .alert-text {
+    font-size: 13px;
+    color: var(--red);
+  }
+
+  .alert-text strong { font-weight: 700; }
+
+  /* LOADING */
+  .state-msg {
+    padding: 40px;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--ink3);
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg {
+    background: var(--red-light);
+    border: 1px solid #e8c0c0;
+    color: var(--red);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    margin: 16px;
+  }
+
+  /* NOTES */
+  .notes-cell {
+    font-size: 12px;
+    color: var(--ink2);
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-style: italic;
+  }
+
+  /* SORT INDICATOR */
+  th .sort-indicator { margin-left: 4px; opacity: 0.4; }
+  th.sorted-asc .sort-indicator::after { content: '↑'; opacity: 1; }
+  th.sorted-desc .sort-indicator::after { content: '↓'; opacity: 1; }
+
+  @media (max-width: 900px) {
+    .summary-row { grid-template-columns: repeat(3,1fr); }
+    main { padding: 16px; }
+    header { padding: 0 16px; }
+    .search-input { width: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="wordmark">Truco <span>International</span></div>
+    <div class="divider-v"></div>
+    <div class="page-label">Quote Tracker</div>
+  </div>
+  <div class="header-right">
+    <span class="last-updated" id="lastUpdated">—</span>
+    <button class="refresh-btn" onclick="loadAll()">⟳ Refresh</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- OVERDUE ALERT -->
+  <div class="alert-box" id="overdueAlert" style="display:none;">
+    <span class="alert-icon">⚠</span>
+    <span class="alert-text" id="overdueAlertText">—</span>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-row">
+    <div class="card">
+      <div class="card-label">Total Quotes</div>
+      <div class="card-value accent" id="kpiTotal">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total Value</div>
+      <div class="card-value accent" id="kpiValue">—</div>
+      <div class="card-sub">All active</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Sent</div>
+      <div class="card-value" id="kpiSent">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Won</div>
+      <div class="card-value won" id="kpiWon">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Overdue Follow-Up</div>
+      <div class="card-value red" id="kpiOverdue">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Avg Quote Age</div>
+      <div class="card-value gold" id="kpiAvgAge">—</div>
+      <div class="card-sub">days</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div>
+        <span class="section-title">Quotes</span>
+        <span class="section-count" id="quoteCount">—</span>
+      </div>
+      <span class="toolbar-label" style="margin-left:12px;">Status:</span>
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('Sent',this)">Sent</button>
+      <button class="filter-btn" onclick="setFilter('Draft',this)">Draft</button>
+      <button class="filter-btn" onclick="setFilter('Won',this)">Won</button>
+      <button class="filter-btn" onclick="setFilter('Lost',this)">Lost</button>
+      <button class="filter-btn" onclick="setFilter('__overdue__',this)">⚠ Overdue</button>
+    </div>
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Search account, quote#, RFQ..."
+      oninput="searchQuotes(this.value)"
+      id="searchInput"
+    />
+  </div>
+
+  <!-- QUOTES TABLE -->
+  <div class="table-wrap">
+    <div id="tableWrap">
+      <div class="state-msg"><span class="spinner"></span> Loading quotes...</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  let allQuotes = [];
+  let currentFilter = 'all';
+  let searchTerm = '';
+  let sortField = 'Quote Date';
+  let sortDir = 'desc';
+
+  // ── FETCH ──────────────────────────────────────────────
+  async function fetchTable(tableName) {
+    const { apiKey, baseId } = AIRTABLE_CONFIG;
+    let records = [];
+    let offset = null;
+    do {
+      const params = new URLSearchParams({ pageSize: 100 });
+      if (offset) params.set('offset', offset);
+      const res = await fetch(
+        `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}?${params}`,
+        { headers: { Authorization: `Bearer ${apiKey}` } }
+      );
+      if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+      const data = await res.json();
+      records = records.concat(data.records);
+      offset = data.offset;
+    } while (offset);
+    return records;
+  }
+
+  async function loadAll() {
+    document.getElementById('lastUpdated').textContent = 'Refreshing...';
+    document.getElementById('tableWrap').innerHTML =
+      '<div class="state-msg"><span class="spinner"></span> Loading quotes...</div>';
+    try {
+      allQuotes = await fetchTable(AIRTABLE_CONFIG.tables.quotes);
+      renderKPIs();
+      renderTable();
+      const now = new Date();
+      document.getElementById('lastUpdated').textContent =
+        'Updated ' + now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    } catch (err) {
+      document.getElementById('lastUpdated').textContent = 'Error';
+      document.getElementById('tableWrap').innerHTML =
+        `<div class="error-msg">⚠ Failed to load: ${esc(err.message)}<br><br>Check your API key in config.js</div>`;
+    }
+  }
+
+  // ── KPIs ───────────────────────────────────────────────
+  function renderKPIs() {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const active = allQuotes.filter(r => !['Won','Lost'].includes(r.fields['Quote Status']));
+    const totalVal = active.reduce((s,r) => s + (r.fields['Quoted Value'] || r.fields['Active Quoted Value'] || 0), 0);
+    const sent = allQuotes.filter(r => r.fields['Quote Status'] === 'Sent').length;
+    const won  = allQuotes.filter(r => r.fields['Quote Status'] === 'Won' || r.fields['Outcome'] === 'Won').length;
+    const overdue = allQuotes.filter(r => {
+      const d = r.fields['Follow-Up Date'];
+      if (!d) return false;
+      return new Date(d) < today && !['Won','Lost'].includes(r.fields['Quote Status']);
+    });
+    const ages = allQuotes.map(r => r.fields['Quote Age']).filter(x => x !== undefined && x !== null);
+    const avgAge = ages.length ? Math.round(ages.reduce((a,b) => a+b, 0) / ages.length) : 0;
+
+    document.getElementById('kpiTotal').textContent = allQuotes.length;
+    document.getElementById('kpiValue').textContent = fmtUSD(totalVal);
+    document.getElementById('kpiSent').textContent = sent;
+    document.getElementById('kpiWon').textContent = won;
+    document.getElementById('kpiOverdue').textContent = overdue.length;
+    document.getElementById('kpiAvgAge').textContent = avgAge;
+
+    const alert = document.getElementById('overdueAlert');
+    const alertText = document.getElementById('overdueAlertText');
+    if (overdue.length > 0) {
+      alert.style.display = 'flex';
+      const names = overdue.slice(0,3).map(r => r.fields['Quote Number'] || '?').join(', ');
+      alertText.innerHTML = `<strong>${overdue.length} quote${overdue.length > 1 ? 's' : ''} past follow-up date:</strong> ${esc(names)}${overdue.length > 3 ? ` and ${overdue.length - 3} more` : ''}. Action required.`;
+    } else {
+      alert.style.display = 'none';
+    }
+  }
+
+  // ── TABLE ──────────────────────────────────────────────
+  function renderTable() {
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    let data = [...allQuotes];
+
+    // Filter
+    if (currentFilter === '__overdue__') {
+      data = data.filter(r => {
+        const d = r.fields['Follow-Up Date'];
+        return d && new Date(d) < today && !['Won','Lost'].includes(r.fields['Quote Status']);
+      });
+    } else if (currentFilter !== 'all') {
+      data = data.filter(r => r.fields['Quote Status'] === currentFilter);
+    }
+
+    // Search
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      data = data.filter(r => {
+        const f = r.fields;
+        return (
+          (f['Quote Number'] || '').toLowerCase().includes(q) ||
+          (f['RFQ Reference'] || '').toLowerCase().includes(q) ||
+          (accountName(f)).toLowerCase().includes(q) ||
+          (f['Product Category'] || '').toLowerCase().includes(q)
+        );
+      });
+    }
+
+    // Sort
+    data.sort((a, b) => {
+      let va = a.fields[sortField];
+      let vb = b.fields[sortField];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va === undefined || va === null) va = '';
+      if (vb === undefined || vb === null) vb = '';
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    document.getElementById('quoteCount').textContent = `${data.length} of ${allQuotes.length}`;
+
+    if (!data.length) {
+      document.getElementById('tableWrap').innerHTML =
+        '<div class="state-msg">No quotes match this filter.</div>';
+      return;
+    }
+
+    const rows = data.map(r => {
+      const f = r.fields;
+      const status = f['Quote Status'] || '';
+      const outcome = f['Outcome'] || '';
+      const val = f['Quoted Value'] || f['Active Quoted Value'] || 0;
+      const followUp = f['Follow-Up Date'];
+      const isOverdue = followUp && new Date(followUp) < today && !['Won','Lost'].includes(status);
+      const age = f['Quote Age'];
+      const account = accountName(f);
+
+      const displayStatus = outcome === 'Won' ? 'Won' : outcome === 'Lost' ? 'Lost' : status;
+
+      return `<tr class="${isOverdue ? 'row-overdue' : ''}">
+        <td><span class="quote-num">${esc(f['Quote Number'] || '—')}</span></td>
+        <td><span class="rfq-ref" title="${esc(f['RFQ Reference'] || '')}">${esc(f['RFQ Reference'] || '—')}</span></td>
+        <td><span class="account">${esc(account)}</span></td>
+        <td><span class="badge ${statusBadge(displayStatus)}">${esc(displayStatus) || '—'}</span></td>
+        <td class="val-cell ${val > 100000 ? 'high' : val > 20000 ? 'med' : ''}">${fmtUSD(val)}</td>
+        <td>${f['Currency'] ? `<span class="badge b-default">${esc(f['Currency'])}</span>` : ''}</td>
+        <td>${f['Product Category'] ? `<span class="badge ${productBadge(f['Product Category'])}">${esc(f['Product Category'])}</span>` : '—'}</td>
+        <td class="date-cell">${f['Quote Date'] ? fmtDate(f['Quote Date']) : '—'}</td>
+        <td class="date-cell ${isOverdue ? 'overdue' : followUpSoon(followUp) ? 'soon' : ''}">${followUp ? fmtDate(followUp) : '—'}${isOverdue ? ' ⚠' : ''}</td>
+        <td class="age-cell ${age > 30 ? 'stale' : ''}">${age !== undefined && age !== null ? age + 'd' : '—'}</td>
+        <td class="notes-cell" title="${esc(f['Internal Notes'] || '')}">${esc(f['Internal Notes'] || '')}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('tableWrap').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            ${thSort('Quote Number', 'Quote #')}
+            ${thSort('RFQ Reference', 'RFQ Ref')}
+            ${thSort('Account', 'Account')}
+            ${thSort('Quote Status', 'Status')}
+            <th style="text-align:right">Value</th>
+            <th>Ccy</th>
+            <th>Product</th>
+            ${thSort('Quote Date', 'Date')}
+            ${thSort('Follow-Up Date', 'Follow-Up')}
+            ${thSort('Quote Age', 'Age')}
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function thSort(field, label) {
+    const cls = sortField === field ? (sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc') : '';
+    return `<th class="${cls}" onclick="setSort('${field}')">
+      ${label}<span class="sort-indicator"></span>
+    </th>`;
+  }
+
+  function setSort(field) {
+    if (sortField === field) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortField = field;
+      sortDir = 'desc';
+    }
+    renderTable();
+  }
+
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTable();
+  }
+
+  function searchQuotes(val) {
+    searchTerm = val;
+    renderTable();
+  }
+
+  // ── HELPERS ────────────────────────────────────────────
+  function accountName(f) {
+    if (!f['Account']) return '—';
+    return Array.isArray(f['Account']) ? f['Account'][0] : f['Account'];
+  }
+
+  function fmtUSD(v) {
+    if (!v) return '$0';
+    if (v >= 1000000) return '$' + (v/1000000).toFixed(2) + 'M';
+    if (v >= 1000) return '$' + Math.round(v/1000) + 'K';
+    return '$' + Number(v).toLocaleString();
+  }
+
+  function fmtDate(d) {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' });
+  }
+
+  function followUpSoon(d) {
+    if (!d) return false;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dt = new Date(d);
+    const diff = (dt - today) / 86400000;
+    return diff >= 0 && diff <= 7;
+  }
+
+  function statusBadge(s) {
+    const map = { 'Sent':'b-sent', 'Draft':'b-draft', 'Won':'b-won', 'Lost':'b-lost' };
+    return map[s] || 'b-default';
+  }
+
+  function productBadge(p) {
+    if (!p) return 'b-default';
+    const pl = p.toLowerCase();
+    if (pl.includes('victaulic')) return 'b-victaulic';
+    if (pl.includes('dixon'))    return 'b-dixon';
+    if (pl.includes('hose'))     return 'b-hose';
+    return 'b-default';
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── INIT ───────────────────────────────────────────────
+  loadAll();
+</script>
+</body>
+</html>
