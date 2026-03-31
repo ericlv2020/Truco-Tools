@@ -1,0 +1,23 @@
+name: Deploy with secrets
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Inject tokens
+        run: |
+          sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_TRUCO_TOOLS }}/g' deal-dashboard.html
+          sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_TRUCO_TOOLS }}/g' quote-tracker.html
+          sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_CLAUDE_INTEGRATION }}/g' config.js
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
