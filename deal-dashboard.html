@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TI — Deal Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;400;600;700&display=swap" rel="stylesheet">
+<script>
+const AIRTABLE_CONFIG = {
+  apiKey: "patFg9bLannibT50i.7b694992025bc7bf3704cee46fc67c9b498d16271639f30599724d50e2960983",
+  baseId: "appFms83tvOuiMDsA",
+  tables: {
+    opportunities: "Opportunities",
+    quotes: "Quotes",
+    accounts: "Accounts",
+    orders: "Orders"
+  }
+};
+</script>
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #faf7f2;
+    --surface2: #ede8de;
+    --border: #d8d0c0;
+    --ink: #1a1612;
+    --ink2: #5a5248;
+    --ink3: #9a9288;
+    --accent: #1a3d2b;
+    --accent-light: #e8f0eb;
+    --gold: #b8860b;
+    --gold-light: #fdf5e0;
+    --red: #8b1a1a;
+    --red-light: #fde8e8;
+    --blue: #1a2d5a;
+    --blue-light: #e8ecf5;
+    --won-bg: #e8f5ee;
+    --won-fg: #1a5c35;
+    --lost-bg: #f5e8e8;
+    --lost-fg: #8b1a1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 0 36px;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    min-height: 64px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 0;
+  }
+
+  .wordmark {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+
+  .wordmark span {
+    color: #a8d8b8;
+    font-weight: 300;
+  }
+
+  .divider-v {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.2);
+  }
+
+  .page-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a8d8b8;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .last-updated {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .refresh-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .refresh-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* MAIN */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 28px 36px;
+  }
+
+  /* KPI CARDS */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+
+  .card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    margin-bottom: 6px;
+  }
+
+  .card-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .card-value.accent { color: var(--accent); }
+  .card-value.gold   { color: var(--gold); }
+  .card-value.red    { color: var(--red); }
+  .card-value.won    { color: var(--won-fg); }
+
+  .card-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 4px;
+  }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 4px;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink2);
+    padding: 5px 13px;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .section-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+    margin-left: 8px;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead { background: var(--surface2); }
+
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink3);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover td { background: #ebe7de; }
+
+  .opp-name {
+    font-weight: 600;
+    font-size: 13px;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .account-name {
+    font-size: 12px;
+    color: var(--ink3);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .b-rfq         { background: var(--blue-light); color: var(--blue); border: 1px solid #c8d4ec; }
+  .b-quoted      { background: var(--accent-light); color: var(--accent); border: 1px solid #b8d8c4; }
+  .b-negotiation { background: var(--gold-light); color: var(--gold); border: 1px solid #e8d8a0; }
+  .b-won         { background: var(--won-bg); color: var(--won-fg); border: 1px solid #b8d8c4; }
+  .b-lost        { background: var(--lost-bg); color: var(--lost-fg); border: 1px solid #e8c0c0; }
+  .b-default     { background: var(--surface2); color: var(--ink3); border: 1px solid var(--border); }
+  .b-sent        { background: var(--accent-light); color: var(--accent); border: 1px solid #b8d8c4; }
+  .b-draft       { background: var(--surface2); color: var(--ink3); border: 1px solid var(--border); }
+
+  .val-cell {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .val-cell.high { color: var(--accent); font-weight: 500; }
+  .val-cell.med  { color: var(--gold); }
+
+  .prob {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink3);
+    text-align: center;
+  }
+
+  .prob.high { color: var(--won-fg); }
+
+  .date-cell {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+    white-space: nowrap;
+  }
+
+  .date-cell.overdue { color: var(--red); font-weight: 500; }
+  .date-cell.soon    { color: var(--gold); font-weight: 500; }
+
+  .next-action {
+    font-size: 12px;
+    color: var(--ink2);
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* LOADING / ERROR */
+  .state-msg {
+    padding: 40px;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--ink3);
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg {
+    background: var(--red-light);
+    border: 1px solid #e8c0c0;
+    color: var(--red);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    margin: 16px;
+  }
+
+  /* DETAIL PANEL */
+  #panelOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,22,18,0.35);
+    z-index: 200;
+    display: none;
+    cursor: pointer;
+  }
+
+  #detailPanel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 440px;
+    max-width: 100vw;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #detailPanel.open { transform: translateX(0); }
+
+  .panel-hd {
+    background: var(--accent);
+    color: white;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  .panel-hd-title {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: white;
+  }
+
+  .panel-hd-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a8d8b8;
+    margin-top: 4px;
+  }
+
+  .panel-close {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+
+  .panel-close:hover { background: rgba(255,255,255,0.25); }
+
+  .panel-body {
+    padding: 24px;
+    flex: 1;
+  }
+
+  .panel-field {
+    margin-bottom: 18px;
+  }
+
+  .panel-field-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    margin-bottom: 3px;
+  }
+
+  .panel-field-value {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.45;
+    word-break: break-word;
+  }
+
+  .panel-field-value.empty { color: var(--ink3); }
+
+  .panel-divider {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin: 24px 0 18px;
+  }
+
+  @media (max-width: 900px) {
+    .summary-row { grid-template-columns: repeat(3, 1fr); }
+    main { padding: 16px; }
+    header { padding: 0 16px; }
+    #detailPanel { width: 100vw; }
+  }
+
+  /* AUTH GATE */
+  #authGate {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .auth-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px 40px 40px;
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .auth-logo {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    margin-bottom: 20px;
+  }
+
+  .auth-wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .auth-wordmark span { font-weight: 300; color: var(--ink3); }
+
+  .auth-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 32px;
+  }
+
+  .auth-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    align-self: flex-start;
+    margin-bottom: 6px;
+  }
+
+  .auth-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .auth-input:focus { border-color: var(--accent); }
+
+  .auth-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 11px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .auth-btn:hover { opacity: 0.88; }
+
+  .auth-error {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    min-height: 16px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="authGate">
+  <div class="auth-box">
+    <img src="TI.png" alt="TI" class="auth-logo">
+    <div class="auth-wordmark">Truco <span>International</span></div>
+    <div class="auth-subtitle">Deal Dashboard</div>
+    <div class="auth-label">Password</div>
+    <input id="authInput" class="auth-input" type="password" placeholder="Enter password"
+      onkeydown="if(event.key==='Enter')submitAuth()">
+    <button class="auth-btn" onclick="submitAuth()">Continue</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<header>
+  <div class="header-left">
+    <img src="TI.png" alt="TI" style="height:36px;width:36px;object-fit:contain;">
+    <div class="wordmark">Truco <span>International</span></div>
+    <div class="divider-v"></div>
+    <div class="page-label">Deal Dashboard</div>
+  </div>
+  <div class="header-right">
+    <span class="last-updated" id="lastUpdated">—</span>
+    <button class="refresh-btn" onclick="loadAll()">⟳ Refresh</button>
+  </div>
+</header>
+
+<main>
+  <!-- KPI CARDS -->
+  <div class="summary-row" id="kpiStrip">
+    <div class="card"><div class="card-label">Active Opps</div><div class="card-value accent" id="kpiActiveOpps">—</div></div>
+    <div class="card"><div class="card-label">Pipeline Value</div><div class="card-value accent" id="kpiPipeline">—</div><div class="card-sub">Total quoted</div></div>
+    <div class="card"><div class="card-label">Weighted Value</div><div class="card-value" id="kpiWeighted">—</div><div class="card-sub">Probability adj.</div></div>
+    <div class="card"><div class="card-label">Overdue Follow-Up</div><div class="card-value red" id="kpiOverdue">—</div><div class="card-sub">Quotes past due</div></div>
+    <div class="card"><div class="card-label">Won (All Time)</div><div class="card-value won" id="kpiWon">—</div></div>
+  </div>
+
+  <!-- OPPORTUNITIES TABLE -->
+  <div>
+    <div class="toolbar">
+      <div class="toolbar-left" id="oppsFilters">
+        <div>
+          <span class="section-title">Opportunities</span>
+          <span class="section-count" id="oppCount">loading...</span>
+        </div>
+        <span class="toolbar-label" style="margin-left:12px;">Stage:</span>
+        <button class="filter-btn active" onclick="filterOpps('all', this)">All</button>
+        <button class="filter-btn" onclick="filterOpps('RFQ Received', this)">RFQ Received</button>
+        <button class="filter-btn" onclick="filterOpps('Quoted', this)">Quoted</button>
+        <button class="filter-btn" onclick="filterOpps('Negotiation', this)">Negotiation</button>
+        <button class="filter-btn" onclick="filterOpps('Won', this)">Won</button>
+        <button class="filter-btn" onclick="filterOpps('Lost', this)">Lost</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div id="oppsTableWrap">
+        <div class="state-msg"><span class="spinner"></span> Loading opportunities...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUOTES TABLE -->
+  <div>
+    <div class="toolbar">
+      <div class="toolbar-left" id="quotesFilters">
+        <div>
+          <span class="section-title">Recent Quotes</span>
+          <span class="section-count" id="quoteCount">loading...</span>
+        </div>
+        <span class="toolbar-label" style="margin-left:12px;">Status:</span>
+        <button class="filter-btn active" onclick="filterQuotes('all', this)">All</button>
+        <button class="filter-btn" onclick="filterQuotes('Sent', this)">Sent</button>
+        <button class="filter-btn" onclick="filterQuotes('Draft', this)">Draft</button>
+        <button class="filter-btn" onclick="filterQuotes('Won', this)">Won</button>
+        <button class="filter-btn" onclick="filterQuotes('Lost', this)">Lost</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div id="quotesTableWrap">
+        <div class="state-msg"><span class="spinner"></span> Loading quotes...</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- DETAIL PANEL -->
+<div id="panelOverlay" onclick="closePanel()"></div>
+<div id="detailPanel" role="dialog" aria-modal="true">
+  <div class="panel-hd">
+    <div>
+      <div class="panel-hd-title" id="panelTitle">—</div>
+      <div class="panel-hd-sub" id="panelSub"></div>
+    </div>
+    <button class="panel-close" onclick="closePanel()" aria-label="Close">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
+<script>
+  // ── STATE ──────────────────────────────────────────────
+  let allOpps = [];
+  let allQuotes = [];
+  let accountMap = {};
+  let oppFilter = 'all';
+  let quoteFilter = 'all';
+
+  // ── AIRTABLE FETCH ─────────────────────────────────────
+  async function fetchTable(tableName) {
+    const { apiKey, baseId } = AIRTABLE_CONFIG;
+    let records = [];
+    let offset = null;
+
+    do {
+      const params = new URLSearchParams({ pageSize: 100 });
+      if (offset) params.set('offset', offset);
+
+      const res = await fetch(
+        `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}?${params}`,
+        { headers: { Authorization: `Bearer ${apiKey}` } }
+      );
+
+      if (!res.ok) throw new Error(`Airtable error ${res.status}: ${await res.text()}`);
+      const data = await res.json();
+      records = records.concat(data.records);
+      offset = data.offset;
+    } while (offset);
+
+    return records;
+  }
+
+  // ── LOAD ALL ───────────────────────────────────────────
+  async function loadAll() {
+    document.getElementById('lastUpdated').textContent = 'Refreshing...';
+    try {
+      const [oppRecords, quoteRecords, accountRecords] = await Promise.all([
+        fetchTable(AIRTABLE_CONFIG.tables.opportunities),
+        fetchTable(AIRTABLE_CONFIG.tables.quotes),
+        fetchTable(AIRTABLE_CONFIG.tables.accounts)
+      ]);
+
+      accountMap = {};
+      accountRecords.forEach(r => { accountMap[r.id] = r.fields['Name'] || r.fields['Account Name'] || r.id; });
+
+      allOpps = oppRecords;
+      allQuotes = quoteRecords;
+
+      renderKPIs();
+      renderOpps();
+      renderQuotes();
+
+      const now = new Date();
+      document.getElementById('lastUpdated').textContent =
+        'Updated ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    } catch (err) {
+      document.getElementById('lastUpdated').textContent = 'Error';
+      showError('oppsTableWrap', err.message);
+      showError('quotesTableWrap', err.message);
+    }
+  }
+
+  // ── KPIs ───────────────────────────────────────────────
+  function renderKPIs() {
+    const active = allOpps.filter(r => !['Won','Lost'].includes(r.fields['Stage']));
+    const pipeline = active.reduce((s, r) => s + (r.fields['Total Quoted Value'] || 0), 0);
+    const weighted = allOpps.reduce((s, r) => s + (r.fields['Weighted Value'] || 0), 0);
+    const won = allOpps.filter(r => r.fields['Stage'] === 'Won').length;
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    const overdue = allQuotes.filter(r => {
+      const d = r.fields['Follow-Up Date'];
+      if (!d) return false;
+      return new Date(d) < today && r.fields['Quote Status'] !== 'Won' && r.fields['Quote Status'] !== 'Lost';
+    }).length;
+
+    document.getElementById('kpiActiveOpps').textContent = active.length;
+    document.getElementById('kpiPipeline').textContent = fmtUSD(pipeline);
+    document.getElementById('kpiWeighted').textContent = fmtUSD(weighted);
+    document.getElementById('kpiOverdue').textContent = overdue;
+    document.getElementById('kpiWon').textContent = won;
+  }
+
+  // ── OPPORTUNITIES ──────────────────────────────────────
+  function renderOpps() {
+    const filtered = oppFilter === 'all'
+      ? allOpps
+      : allOpps.filter(r => (r.fields['Stage'] || '') === oppFilter);
+
+    document.getElementById('oppCount').textContent = filtered.length + ' records';
+
+    if (!filtered.length) {
+      document.getElementById('oppsTableWrap').innerHTML =
+        '<div class="state-msg">No opportunities match this filter.</div>';
+      return;
+    }
+
+    const rows = filtered.map(r => {
+      const f = r.fields;
+      const stage = f['Stage'] || '';
+      const val = f['Total Quoted Value'] || 0;
+      const prob = Math.round((f['Probability (%)'] || 0) * 100);
+      const closure = f['Expected Closure Date'] ? fmtDate(f['Expected Closure Date']) : '—';
+      const closureClass = closureDateClass(f['Expected Closure Date']);
+      const nextAction = f['Next Action'] || '—';
+      const nextDate = f['Next Action Date'] ? fmtDate(f['Next Action Date']) : '';
+      const nextDateClass = closureDateClass(f['Next Action Date']);
+
+      return `<tr class="clickable" onclick="openPanel('opp','${r.id}')">
+        <td>
+          <div class="opp-name">${esc(f['Opportunity Name'] || '—')}</div>
+        </td>
+        <td><span class="badge ${stageBadge(stage)}">${esc(stage) || '—'}</span></td>
+        <td class="val-cell ${val > 100000 ? 'high' : val > 20000 ? 'med' : ''}">${fmtUSD(val)}</td>
+        <td class="prob ${prob >= 70 ? 'high' : ''}">${prob}%</td>
+        <td class="date-cell ${closureClass}">${closure}</td>
+        <td class="next-action">${esc(nextAction)}</td>
+        <td class="date-cell ${nextDateClass}">${nextDate}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('oppsTableWrap').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Opportunity</th>
+          <th>Stage</th>
+          <th style="text-align:right">Value (USD)</th>
+          <th style="text-align:center">Prob.</th>
+          <th>Closure</th>
+          <th>Next Action</th>
+          <th>Action Date</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function filterOpps(stage, btn) {
+    oppFilter = stage;
+    document.getElementById('oppsFilters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderOpps();
+  }
+
+  // ── QUOTES ─────────────────────────────────────────────
+  function renderQuotes() {
+    const sorted = [...allQuotes].sort((a, b) => {
+      const da = new Date(a.fields['Quote Date'] || 0);
+      const db = new Date(b.fields['Quote Date'] || 0);
+      return db - da;
+    });
+
+    const filtered = quoteFilter === 'all'
+      ? sorted
+      : sorted.filter(r => (r.fields['Quote Status'] || '') === quoteFilter);
+
+    document.getElementById('quoteCount').textContent = filtered.length + ' records';
+
+    if (!filtered.length) {
+      document.getElementById('quotesTableWrap').innerHTML =
+        '<div class="state-msg">No quotes match this filter.</div>';
+      return;
+    }
+
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    const rows = filtered.map(r => {
+      const f = r.fields;
+      const status = f['Quote Status'] || '';
+      const val = f['Quoted Value'] || f['Active Quoted Value'] || 0;
+      const followUp = f['Follow-Up Date'];
+      const followUpStr = followUp ? fmtDate(followUp) : '—';
+      const followUpClass = followUpDateClass(followUp, status);
+      const outcome = f['Outcome'] || '';
+      const age = f['Quote Age'] !== undefined ? f['Quote Age'] + 'd' : '—';
+
+      return `<tr class="clickable" onclick="openPanel('quote','${r.id}')">
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);font-weight:500;">${esc(f['Quote Number'] || '—')}</td>
+        <td style="font-size:12px;color:var(--ink2);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(f['RFQ Reference'] || '—')}</td>
+        <td style="font-size:13px;font-weight:600;">${esc(f['Account'] ? (accountMap[f['Account'][0]] || f['Account'][0]) : '—')}</td>
+        <td><span class="badge ${statusBadge(status)}">${esc(status) || '—'}</span></td>
+        <td class="val-cell ${val > 100000 ? 'high' : val > 20000 ? 'med' : ''}">${fmtUSD(val)}</td>
+        <td style="font-size:11px;color:var(--ink3);font-family:'IBM Plex Mono',monospace;">${esc(f['Product Category'] || '—')}</td>
+        <td class="date-cell ${followUpClass}">${followUpStr}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink3);">${age}</td>
+        <td>${outcome ? `<span class="badge ${outcomeBadge(outcome)}">${esc(outcome)}</span>` : ''}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('quotesTableWrap').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Quote #</th>
+          <th>RFQ Reference</th>
+          <th>Account</th>
+          <th>Status</th>
+          <th style="text-align:right">Value</th>
+          <th>Product</th>
+          <th>Follow-Up</th>
+          <th>Age</th>
+          <th>Outcome</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function filterQuotes(status, btn) {
+    quoteFilter = status;
+    document.getElementById('quotesFilters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderQuotes();
+  }
+
+  // ── DETAIL PANEL ───────────────────────────────────────
+  function openPanel(type, id) {
+    const record = type === 'opp'
+      ? allOpps.find(r => r.id === id)
+      : allQuotes.find(r => r.id === id);
+    if (!record) return;
+
+    const f = record.fields;
+    if (type === 'opp') {
+      document.getElementById('panelTitle').textContent = f['Opportunity Name'] || '—';
+      document.getElementById('panelSub').textContent = 'Opportunity';
+    } else {
+      document.getElementById('panelTitle').textContent = f['Quote Number'] || '—';
+      document.getElementById('panelSub').textContent = f['RFQ Reference'] ? 'Quote · ' + f['RFQ Reference'] : 'Quote';
+    }
+
+    document.getElementById('panelBody').innerHTML = renderPanelFields(f, type);
+    document.getElementById('panelOverlay').style.display = 'block';
+    document.getElementById('detailPanel').classList.add('open');
+  }
+
+  function closePanel() {
+    document.getElementById('panelOverlay').style.display = 'none';
+    document.getElementById('detailPanel').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+  function renderPanelFields(f, type) {
+    // Fields to show first, in order, for each type
+    const primaryKeys = type === 'opp'
+      ? ['Opportunity Name','Account','Stage','Probability (%)','Total Quoted Value','Weighted Value','Expected Closure Date','Next Action','Next Action Date']
+      : ['Quote Number','RFQ Reference','Account','Quote Status','Quoted Value','Active Quoted Value','Currency','Product Category','Quote Date','Follow-Up Date','Quote Age','Outcome','Internal Notes'];
+
+    const shownSet = new Set(primaryKeys);
+    const extraEntries = Object.keys(f).filter(k => !shownSet.has(k));
+
+    let html = primaryKeys
+      .filter(k => k in f || k === 'Account')
+      .map(k => panelField(k, getPanelValue(k, f)))
+      .join('');
+
+    if (extraEntries.length) {
+      html += `<div class="panel-divider">Additional Fields</div>`;
+      html += extraEntries.map(k => panelField(k, getPanelValue(k, f))).join('');
+    }
+
+    return html;
+  }
+
+  function getPanelValue(key, f) {
+    const val = f[key];
+    if (key === 'Probability (%)') return val != null ? Math.round(val * 100) + '%' : null;
+    if (key === 'Account') {
+      if (!f['Account'] || !f['Account'].length) return null;
+      return accountMap[f['Account'][0]] || f['Account'][0];
+    }
+    return formatFieldValue(key, val);
+  }
+
+  function formatFieldValue(key, val) {
+    if (val == null || val === '') return null;
+    if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+    if (Array.isArray(val)) {
+      if (!val.length) return null;
+      return val.map(v => (typeof v === 'string' ? (accountMap[v] || v) : String(v))).join(', ');
+    }
+    if (typeof val === 'number') {
+      const kl = key.toLowerCase();
+      if (kl.includes('value') || kl.includes('price') || kl.includes('amount')) return fmtUSD(val);
+      return val.toString();
+    }
+    if (typeof val === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}/.test(val)) return fmtDate(val);
+      return val;
+    }
+    return String(val);
+  }
+
+  function panelField(label, value) {
+    const empty = value == null || value === '';
+    const display = empty ? '—' : value;
+    return `<div class="panel-field">
+      <div class="panel-field-label">${esc(label)}</div>
+      <div class="panel-field-value${empty ? ' empty' : ''}">${esc(String(display))}</div>
+    </div>`;
+  }
+
+  // ── HELPERS ────────────────────────────────────────────
+  function fmtUSD(v) {
+    if (!v) return '$0';
+    if (v >= 1000000) return '$' + (v/1000000).toFixed(2) + 'M';
+    if (v >= 1000) return '$' + Math.round(v/1000) + 'K';
+    return '$' + v.toLocaleString();
+  }
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' });
+  }
+
+  function closureDateClass(d) {
+    if (!d) return '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dt = new Date(d);
+    const diff = (dt - today) / 86400000;
+    if (diff < 0) return 'overdue';
+    if (diff <= 14) return 'soon';
+    return '';
+  }
+
+  function followUpDateClass(d, status) {
+    if (!d || status === 'Won' || status === 'Lost') return '';
+    return closureDateClass(d);
+  }
+
+  function stageBadge(s) {
+    const map = {
+      'RFQ Received': 'b-rfq',
+      'Quoted':       'b-quoted',
+      'Negotiation':  'b-negotiation',
+      'Won':          'b-won',
+      'Lost':         'b-lost'
+    };
+    return map[s] || 'b-default';
+  }
+
+  function statusBadge(s) {
+    const map = { 'Sent': 'b-sent', 'Draft': 'b-draft', 'Won': 'b-won', 'Lost': 'b-lost' };
+    return map[s] || 'b-default';
+  }
+
+  function outcomeBadge(o) {
+    if (o === 'Won') return 'b-won';
+    if (o === 'Lost') return 'b-lost';
+    return 'b-default';
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function showError(id, msg) {
+    document.getElementById(id).innerHTML =
+      `<div class="error-msg">⚠ Failed to load: ${esc(msg)}</div>`;
+  }
+
+  // ── AUTH ───────────────────────────────────────────────
+  const PW_HASH = '28d02b85f5f54195d6a7bc9bf2ea728f6fc8e220cb949f240d8ed33317024146';
+  const SESSION_KEY = 'ti_auth';
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function submitAuth() {
+    const val = document.getElementById('authInput').value;
+    const hash = await sha256(val);
+    if (hash === PW_HASH) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      document.getElementById('authGate').style.display = 'none';
+      loadAll();
+    } else {
+      document.getElementById('authError').textContent = 'Incorrect password. Please try again.';
+      document.getElementById('authInput').value = '';
+      document.getElementById('authInput').focus();
+    }
+  }
+
+  // ── INIT ───────────────────────────────────────────────
+  if (sessionStorage.getItem(SESSION_KEY)) {
+    document.getElementById('authGate').style.display = 'none';
+    loadAll();
+  } else {
+    document.getElementById('authInput').focus();
+  }
+</script>
+</body>
+</html>
