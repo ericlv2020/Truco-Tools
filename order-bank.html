@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TI — Order Bank</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;400;600;700&display=swap" rel="stylesheet">
+<script>
+const AIRTABLE_CONFIG = {
+  apiKey: "patFg9bLannibT50i.c8cf37015e191485bf6c283c455fad291d0ffb77bbbcf84386d4e2ef73a5591a",
+  baseId: "appFms83tvOuiMDsA",
+  tables: {
+    opportunities: "Opportunities",
+    quotes: "Quotes",
+    accounts: "Accounts",
+    orders: "Orders"
+  }
+};
+</script>
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #faf7f2;
+    --surface2: #ede8de;
+    --border: #d8d0c0;
+    --ink: #1a1612;
+    --ink2: #5a5248;
+    --ink3: #9a9288;
+    --accent: #1a3d2b;
+    --accent-light: #e8f0eb;
+    --gold: #b8860b;
+    --gold-light: #fdf5e0;
+    --red: #8b1a1a;
+    --red-light: #fde8e8;
+    --blue: #1a2d5a;
+    --blue-light: #e8ecf5;
+    --won-bg: #e8f5ee;
+    --won-fg: #1a5c35;
+    --lost-bg: #f5e8e8;
+    --lost-fg: #8b1a1a;
+    --purple: #5b21b6;
+    --purple-light: #f0ebf8;
+    --cyan: #0e5e6f;
+    --cyan-light: #e6f4f6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 0 36px;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    min-height: 64px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 0;
+  }
+
+  .wordmark {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+
+  .wordmark span {
+    color: #a8d8b8;
+    font-weight: 300;
+  }
+
+  .divider-v {
+    width: 1px;
+    background: rgba(255,255,255,0.18);
+    align-self: stretch;
+  }
+
+  .page-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .last-updated {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .refresh-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .refresh-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* MAIN */
+  main {
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 28px 36px;
+  }
+
+  /* KPI STRIP */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+  }
+
+  .card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink3);
+    margin-bottom: 6px;
+  }
+
+  .card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .card-value.accent { color: var(--accent); }
+  .card-value.red { color: var(--red); }
+  .card-value.won { color: var(--won-fg); }
+  .card-value.gold { color: var(--gold); }
+  .card-value.blue { color: var(--blue); }
+  .card-value.purple { color: var(--purple); }
+  .card-value.cyan { color: var(--cyan); }
+
+  .card-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 4px;
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 28px;
+  }
+
+  .section-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-hold { background: var(--red-light); color: var(--red); }
+  .badge-production { background: var(--purple-light); color: var(--purple); }
+  .badge-ready { background: var(--won-bg); color: var(--won-fg); }
+  .badge-shipped { background: var(--cyan-light); color: var(--cyan); }
+  .badge-confirmed { background: var(--blue-light); color: var(--blue); }
+  .badge-new { background: var(--gold-light); color: var(--gold); }
+  .badge-attention { background: var(--red-light); color: var(--red); }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink3);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    background: var(--surface2);
+  }
+
+  tbody td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--surface2);
+    vertical-align: top;
+  }
+
+  tbody tr:hover { background: var(--accent-light); }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; }
+  .right { text-align: right; }
+  .notes { font-size: 11px; color: var(--ink3); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .flag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .flag-overdue { background: var(--red-light); color: var(--red); }
+  .flag-soon { background: var(--gold-light); color: var(--gold); }
+  .flag-ok { background: var(--won-bg); color: var(--won-fg); }
+  .margin-good { color: var(--won-fg); }
+  .margin-warn { color: var(--gold); }
+  .margin-bad { color: var(--red); }
+
+  /* ACCOUNT CARDS */
+  .account-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .account-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+
+  .account-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .account-detail {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+  }
+
+  .account-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-top: 8px;
+  }
+
+  /* LOADING */
+  .loading-msg {
+    text-align: center;
+    padding: 48px;
+    color: var(--ink3);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  .error-msg {
+    text-align: center;
+    padding: 24px;
+    color: var(--red);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  /* FOOTER */
+  footer {
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 0 36px 36px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .summary-row { grid-template-columns: repeat(3, 1fr); }
+    .account-grid { grid-template-columns: repeat(2, 1fr); }
+    main { padding: 20px 16px; }
+    header { padding: 0 16px; }
+  }
+
+  @media (max-width: 600px) {
+    .summary-row { grid-template-columns: repeat(2, 1fr); }
+    .account-grid { grid-template-columns: 1fr; }
+  }
+
+  /* AUTH GATE */
+  #authGate {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .auth-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px 40px 40px;
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .auth-logo {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    margin-bottom: 20px;
+  }
+
+  .auth-wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .auth-wordmark span { font-weight: 300; color: var(--ink3); }
+
+  .auth-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 32px;
+  }
+
+  .auth-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    align-self: flex-start;
+    margin-bottom: 6px;
+  }
+
+  .auth-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .auth-input:focus { border-color: var(--accent); }
+
+  .auth-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 11px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .auth-btn:hover { opacity: 0.88; }
+
+  .auth-error {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    min-height: 16px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="authGate">
+  <div class="auth-box">
+    <img src="TI.png" alt="TI" class="auth-logo">
+    <div class="auth-wordmark">Truco <span>International</span></div>
+    <div class="auth-subtitle">Order Bank</div>
+    <div class="auth-label">Password</div>
+    <input id="authInput" class="auth-input" type="password" placeholder="Enter password"
+      onkeydown="if(event.key==='Enter')submitAuth()">
+    <button class="auth-btn" onclick="submitAuth()">Continue</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<header>
+  <div class="header-left">
+    <img src="TI.png" alt="TI" style="height:36px;width:36px;object-fit:contain;">
+    <div class="wordmark">Truco <span>International</span></div>
+    <div class="divider-v"></div>
+    <div class="page-label">Order Bank</div>
+  </div>
+  <div class="header-right">
+    <span class="last-updated" id="lastUpdated">—</span>
+    <button class="refresh-btn" onclick="loadAll()">&#x27F3; Refresh</button>
+  </div>
+</header>
+
+<main id="mainContent">
+  <div class="loading-msg" id="loadingMsg">Loading order data from Airtable...</div>
+</main>
+
+<footer id="footer" style="display:none;">
+  Source: Airtable TI Commercial Engine &middot; Live data
+</footer>
+
+<script>
+  // ── HELPERS ──────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+  const esc = s => s ? String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+  const fmtUSD = n => '$' + Number(n||0).toLocaleString('en-US', {maximumFractionDigits:0});
+  const fmtVal = (n,c) => {
+    const sym = {USD:'$',EUR:'\u20AC',ZAR:'R',AUD:'A$',GBP:'\u00A3',EGP:'E\u00A3'}[c]||'$';
+    return sym + Number(n||0).toLocaleString('en-US', {maximumFractionDigits:0});
+  };
+
+  function daysBetween(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr + 'T00:00:00');
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    return Math.round((d - now) / 86400000);
+  }
+
+  function fmtDate(dateStr) {
+    if (!dateStr) return 'TBD';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+
+  function shipDateHtml(dateStr) {
+    if (!dateStr) return '<span style="color:var(--ink3)">TBD</span>';
+    const days = daysBetween(dateStr);
+    const label = fmtDate(dateStr);
+    if (days < 0) return `<span class="flag flag-overdue">${esc(label)} (overdue)</span>`;
+    if (days <= 14) return `<span class="flag flag-soon">${esc(label)} (${days}d)</span>`;
+    return esc(label);
+  }
+
+  function marginHtml(pct) {
+    if (pct === null || pct === undefined || pct === '') return '<span style="color:var(--ink3)">n/a</span>';
+    const n = Number(pct);
+    if (isNaN(n)) return '<span style="color:var(--ink3)">n/a</span>';
+    const display = (n * 100).toFixed(1) + '%';
+    if (n >= 0.2) return `<span class="margin-good">${display}</span>`;
+    if (n >= 0) return `<span class="margin-warn">${display}</span>`;
+    if (n > -1) return `<span class="margin-bad">${display}</span>`;
+    // Wildly negative = likely data issue
+    return `<span class="margin-bad" title="Possible cost data issue">${display} *</span>`;
+  }
+
+  // ── AIRTABLE FETCH ──────────────────────────────────
+  const apiKey = AIRTABLE_CONFIG.apiKey;
+  const baseId = AIRTABLE_CONFIG.baseId;
+
+  async function fetchAll(table, fields) {
+    let all = [], offset = null;
+    const params = fields.map(f => `fields%5B%5D=${encodeURIComponent(f)}`).join('&');
+    do {
+      const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}?${params}&pageSize=100` +
+        (offset ? `&offset=${offset}` : '');
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${apiKey}` } });
+      if (!res.ok) throw new Error(`Airtable ${res.status}`);
+      const data = await res.json();
+      all = all.concat(data.records || []);
+      offset = data.offset;
+    } while (offset);
+    return all;
+  }
+
+  // ── LOAD & RENDER ───────────────────────────────────
+  async function loadAll() {
+    $('mainContent').innerHTML = '<div class="loading-msg">Loading order data from Airtable...</div>';
+    $('footer').style.display = 'none';
+    $('lastUpdated').textContent = 'loading...';
+
+    try {
+      const [orders, accounts] = await Promise.all([
+        fetchAll('Orders', ['Customer PO Number','Order Status','Order Date','Promised Ship Date',
+          'Actual Ship Date','Order Value','Currency','Order Value (USD)','Account',
+          'Order Notes','Total Purchase Cost','Gross Margin','Gross Margin %']),
+        fetchAll('Accounts', ['Name'])
+      ]);
+
+      // Build account lookup
+      const accMap = {};
+      accounts.forEach(a => { accMap[a.id] = (a.fields['Name'] || 'Unknown'); });
+
+      // Parse orders
+      const parsed = orders.map(r => {
+        const f = r.fields;
+        const accLinks = f['Account'] || [];
+        const accId = accLinks.length ? accLinks[0] : null;
+        return {
+          id: r.id,
+          po: f['Customer PO Number'] || '',
+          status: f['Order Status'] || 'No Status',
+          orderDate: f['Order Date'] || '',
+          shipDate: f['Promised Ship Date'] || '',
+          actualShip: f['Actual Ship Date'] || '',
+          value: f['Order Value'] || 0,
+          currency: f['Currency'] || 'USD',
+          usd: f['Order Value (USD)'] || 0,
+          account: accId ? (accMap[accId] || 'Unknown') : 'Unknown',
+          notes: f['Order Notes'] || '',
+          cost: f['Total Purchase Cost'] || 0,
+          margin: f['Gross Margin'] || 0,
+          marginPct: f['Gross Margin %'] ?? null
+        };
+      });
+
+      render(parsed);
+      const now = new Date();
+      $('lastUpdated').textContent = 'Updated ' + now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+      $('footer').style.display = '';
+
+    } catch (err) {
+      $('mainContent').innerHTML = `<div class="error-msg">Failed to load: ${esc(err.message)}</div>`;
+      $('lastUpdated').textContent = 'error';
+    }
+  }
+
+  function render(orders) {
+    const active = orders.filter(o => !['Closed','Delivered'].includes(o.status));
+    const closed = orders.filter(o => o.status === 'Closed').length;
+    const delivered = orders.filter(o => o.status === 'Delivered').length;
+
+    // Group by status
+    const byStatus = {};
+    active.forEach(o => {
+      if (!byStatus[o.status]) byStatus[o.status] = [];
+      byStatus[o.status].push(o);
+    });
+
+    // KPIs
+    const totalUSD = active.reduce((s,o) => s + Number(o.usd||0), 0);
+    const inProd = byStatus['In Production'] || [];
+    const ready = byStatus['Ready to Ship'] || [];
+    const onHold = byStatus['On hold'] || [];
+    const shipped = byStatus['Shipped'] || [];
+    const confirmed = byStatus['Confirmed'] || [];
+
+    const sumUSD = arr => arr.reduce((s,o) => s + Number(o.usd||0), 0);
+
+    // Top accounts
+    const byAccount = {};
+    active.forEach(o => {
+      if (!byAccount[o.account]) byAccount[o.account] = { count: 0, usd: 0, statuses: {} };
+      byAccount[o.account].count++;
+      byAccount[o.account].usd += Number(o.usd||0);
+      byAccount[o.account].statuses[o.status] = (byAccount[o.account].statuses[o.status]||0) + 1;
+    });
+    const topAccounts = Object.entries(byAccount)
+      .sort((a,b) => b[1].usd - a[1].usd)
+      .slice(0, 6);
+
+    // Attention items
+    const attention = [];
+    // On hold orders
+    onHold.sort((a,b) => Number(b.usd) - Number(a.usd)).forEach(o => {
+      attention.push({ ...o, issue: o.shipDate ? `On hold, ship date ${fmtDate(o.shipDate)}` : 'On hold, no ship date set' });
+    });
+    // Overdue ship dates
+    active.filter(o => o.status !== 'On hold' && o.shipDate && daysBetween(o.shipDate) < 0)
+      .sort((a,b) => Number(b.usd) - Number(a.usd))
+      .forEach(o => { attention.push({ ...o, issue: `Ship date ${fmtDate(o.shipDate)} — overdue` }); });
+    // Large confirmed with no ship date
+    confirmed.filter(o => !o.shipDate && Number(o.usd) > 50000)
+      .sort((a,b) => Number(b.usd) - Number(a.usd))
+      .forEach(o => { attention.push({ ...o, issue: `${fmtUSD(o.usd)} confirmed, no ship date` }); });
+    // In production shipping within 14 days
+    inProd.filter(o => o.shipDate && daysBetween(o.shipDate) >= 0 && daysBetween(o.shipDate) <= 14)
+      .sort((a,b) => daysBetween(a.shipDate) - daysBetween(b.shipDate))
+      .forEach(o => { attention.push({ ...o, issue: `Ships ${fmtDate(o.shipDate)} (${daysBetween(o.shipDate)}d) — in production` }); });
+
+    // ── BUILD HTML ──
+    let html = '';
+
+    // KPI Strip
+    html += `<div class="summary-row">
+      <div class="card"><div class="card-label">Active Orders</div><div class="card-value accent">${active.length}</div><div class="card-sub">of ${orders.length} total</div></div>
+      <div class="card"><div class="card-label">Active Value</div><div class="card-value accent">${fmtUSD(totalUSD)}</div><div class="card-sub">USD equivalent</div></div>
+      <div class="card"><div class="card-label">In Production</div><div class="card-value purple">${inProd.length}</div><div class="card-sub">${fmtUSD(sumUSD(inProd))}</div></div>
+      <div class="card"><div class="card-label">Ready to Ship</div><div class="card-value won">${ready.length}</div><div class="card-sub">${fmtUSD(sumUSD(ready))}</div></div>
+      <div class="card"><div class="card-label">On Hold</div><div class="card-value red">${onHold.length}</div><div class="card-sub">${fmtUSD(sumUSD(onHold))}</div></div>
+    </div>`;
+
+    // Top Accounts
+    html += `<div class="section"><div class="section-bar"><div class="section-title">Top Accounts by Active Order Value</div></div><div class="account-grid">`;
+    topAccounts.forEach(([name, data]) => {
+      const statusSummary = Object.entries(data.statuses).map(([s,c]) => `${c} ${s.toLowerCase()}`).join(', ');
+      html += `<div class="account-card">
+        <div class="account-name">${esc(name)}</div>
+        <div class="account-detail">${data.count} order${data.count>1?'s':''} &middot; ${esc(statusSummary)}</div>
+        <div class="account-value">${fmtUSD(data.usd)}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+
+    // Attention
+    if (attention.length) {
+      html += `<div class="section"><div class="section-bar"><div class="section-title">Needs Attention</div><span class="badge badge-attention">Action Required</span></div>`;
+      html += `<table><thead><tr><th>PO Number</th><th>Account</th><th>Status</th><th>Issue</th><th class="right">Value (USD)</th></tr></thead><tbody>`;
+      attention.forEach(o => {
+        const flagClass = o.status === 'On hold' ? 'flag-overdue' : 'flag-soon';
+        html += `<tr>
+          <td class="mono">${esc(o.po)}</td>
+          <td>${esc(o.account)}</td>
+          <td><span class="flag ${flagClass}">${esc(o.status)}</span></td>
+          <td>${esc(o.issue)}</td>
+          <td class="right mono">${fmtUSD(o.usd)}</td>
+        </tr>`;
+      });
+      html += `</tbody></table></div>`;
+    }
+
+    // Status group tables
+    const groups = [
+      { key: 'In Production', badge: 'badge-production', label: 'In Production' },
+      { key: 'Ready to Ship', badge: 'badge-ready', label: 'Ready to Ship' },
+      { key: 'Shipped', badge: 'badge-shipped', label: 'Shipped (In Transit)' },
+      { key: 'On hold', badge: 'badge-hold', label: 'On Hold' },
+      { key: 'Confirmed', badge: 'badge-confirmed', label: 'Confirmed' },
+      { key: 'New', badge: 'badge-new', label: 'New' },
+    ];
+
+    groups.forEach(g => {
+      const items = (byStatus[g.key] || []).sort((a,b) => Number(b.usd) - Number(a.usd));
+      if (!items.length) return;
+      const groupUSD = sumUSD(items);
+
+      html += `<div class="section"><div class="section-bar">
+        <div class="section-title">${esc(g.label)}</div>
+        <span class="badge ${g.badge}">${items.length} order${items.length>1?'s':''} &middot; ${fmtUSD(groupUSD)}</span>
+      </div>`;
+
+      // For Confirmed, show top 15 + summary
+      const show = g.key === 'Confirmed' ? items.slice(0, 15) : items;
+      const remaining = g.key === 'Confirmed' ? items.length - show.length : 0;
+
+      html += `<table><thead><tr>
+        <th>PO Number</th><th>Account</th><th class="right">Value</th><th>Ccy</th>
+        <th class="right">USD</th><th>Ship Date</th><th>Margin</th><th>Notes</th>
+      </tr></thead><tbody>`;
+
+      show.forEach(o => {
+        html += `<tr>
+          <td class="mono">${esc(o.po)}</td>
+          <td>${esc(o.account)}</td>
+          <td class="right mono">${Number(o.value||0).toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+          <td class="mono">${esc(o.currency)}</td>
+          <td class="right mono">${fmtUSD(o.usd)}</td>
+          <td>${shipDateHtml(o.shipDate)}</td>
+          <td>${marginHtml(o.marginPct)}</td>
+          <td class="notes" title="${esc(o.notes)}">${esc(o.notes)}</td>
+        </tr>`;
+      });
+
+      html += `</tbody></table>`;
+      if (remaining > 0) {
+        html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink3);margin-top:8px;">+ ${remaining} more confirmed orders</div>`;
+      }
+      html += `</div>`;
+    });
+
+    // No-status orders
+    const noStatus = byStatus['No Status'] || [];
+    if (noStatus.length) {
+      html += `<div class="section"><div class="section-bar"><div class="section-title">No Status</div><span class="badge">${noStatus.length}</span></div>`;
+      html += `<table><thead><tr><th>PO Number</th><th>Account</th><th class="right">USD</th><th>Notes</th></tr></thead><tbody>`;
+      noStatus.forEach(o => {
+        html += `<tr><td class="mono">${esc(o.po||'(blank)')}</td><td>${esc(o.account)}</td><td class="right mono">${fmtUSD(o.usd)}</td><td class="notes">${esc(o.notes)}</td></tr>`;
+      });
+      html += `</tbody></table></div>`;
+    }
+
+    $('mainContent').innerHTML = html;
+  }
+
+  // ── AUTH ───────────────────────────────────────────────
+  const PW_HASH = '28d02b85f5f54195d6a7bc9bf2ea728f6fc8e220cb949f240d8ed33317024146';
+  const SESSION_KEY = 'ti_auth';
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function submitAuth() {
+    const val = document.getElementById('authInput').value;
+    const hash = await sha256(val);
+    if (hash === PW_HASH) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      document.getElementById('authGate').style.display = 'none';
+      loadAll();
+    } else {
+      document.getElementById('authError').textContent = 'Incorrect password. Please try again.';
+      document.getElementById('authInput').value = '';
+      document.getElementById('authInput').focus();
+    }
+  }
+
+  // ── INIT ───────────────────────────────────────────────
+  if (sessionStorage.getItem(SESSION_KEY)) {
+    document.getElementById('authGate').style.display = 'none';
+    loadAll();
+  } else {
+    document.getElementById('authInput').focus();
+  }
+</script>
+</body>
+</html>
