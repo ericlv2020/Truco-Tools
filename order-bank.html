@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;400;600;700&display=swap" rel="stylesheet">
 <script>
 const AIRTABLE_CONFIG = {
-  apiKey: "patFg9bLannibT50i.c8cf37015e191485bf6c283c455fad291d0ffb77bbbcf84386d4e2ef73a5591a",
+  apiKey: "patFg9bLannibT50i.c8cf37015e191485bf6c283c455fad291d0ffb77bbbcf84386d4e2ef73a5591a"
   baseId: "appFms83tvOuiMDsA",
   tables: {
     opportunities: "Opportunities",
@@ -553,7 +553,7 @@ const AIRTABLE_CONFIG = {
       const [orders, accounts] = await Promise.all([
         fetchAll('Orders', ['Customer PO Number','Order Status','Order Date','Promised Ship Date',
           'Actual Ship Date','Order Value','Currency','Order Value (USD)','Account',
-          'Order Notes','Total Purchase Cost','Gross Margin','Gross Margin %']),
+          'Order Notes','Total Cost (USD)','Gross Margin','Gross Margin %']),
         fetchAll('Accounts', ['Name'])
       ]);
 
@@ -578,7 +578,7 @@ const AIRTABLE_CONFIG = {
           usd: f['Order Value (USD)'] || 0,
           account: accId ? (accMap[accId] || 'Unknown') : 'Unknown',
           notes: f['Order Notes'] || '',
-          cost: f['Total Purchase Cost'] || 0,
+          cost: f['Total Cost (USD)'] || 0,
           margin: f['Gross Margin'] || 0,
           marginPct: f['Gross Margin %'] ?? null
         };
