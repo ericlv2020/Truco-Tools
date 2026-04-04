@@ -18,6 +18,7 @@ jobs:
           sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_TRUCO_TOOLS }}/g' deal-dashboard.html
           sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_TRUCO_TOOLS }}/g' quote-tracker.html
           sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_TRUCO_TOOLS }}/g' order-bank.html
+          sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_TRUCO_TOOLS }}/g' dashboard.html
           sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_CLAUDE_INTEGRATION }}/g' config.js
 
       - name: Deploy to GitHub Pages
