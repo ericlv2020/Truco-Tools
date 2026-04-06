@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iran — Four End Conditions</title>
+<meta property="og:title" content="Iran — Four End Conditions">
+<meta property="og:description" content="A strategic outcome matrix: from No Deal to Complete Victory — what each scenario means and what it requires. Click any point to read the full analysis.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #F5F3EE;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1.5rem 2rem;
+  color: #1A1A1A;
+}
+
+.page {
+  max-width: 900px;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+  border-left: 3px solid #1A1A1A;
+  padding-left: 1.1rem;
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  color: #0F0F0F;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.header p {
+  font-size: 0.83rem;
+  color: #6B6B6B;
+  margin-top: 0.35rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.diagram-wrap {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #E2E0DB;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+svg text {
+  font-family: 'DM Sans', sans-serif;
+}
+
+.sat-group {
+  cursor: pointer;
+}
+
+.sat-group circle {
+  transition: transform 0.15s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.sat-group:hover circle {
+  transform: scale(1.07);
+}
+
+.sat-group:hover .sat-label {
+  font-weight: 600;
+}
+
+.hint {
+  text-align: center;
+  font-size: 0.775rem;
+  color: #9E9A93;
+  margin-top: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+/* MODAL */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,15,15,0.55);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  backdrop-filter: blur(3px);
+}
+
+.overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: #FAFAF7;
+  border-radius: 14px;
+  max-width: 500px;
+  width: 100%;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.22);
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid #E0DDD8;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  color: #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.1s;
+}
+
+.modal-close:hover { background: #F0EEE9; }
+
+.modal-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 11px;
+  border-radius: 20px;
+  margin-bottom: 0.9rem;
+}
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #0F0F0F;
+  margin-bottom: 0.85rem;
+  line-height: 1.35;
+}
+
+.modal-body {
+  font-size: 0.895rem;
+  color: #333;
+  line-height: 1.78;
+}
+
+@media (max-width: 480px) {
+  body { padding: 1.5rem 1rem; }
+  .header h1 { font-size: 1.3rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="header">
+    <h1>Iran &mdash; Four End Conditions</h1>
+    <p>Strategic outcome matrix &nbsp;&middot;&nbsp; Click any bubble to read the full analysis</p>
+  </div>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 820 680" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Quadrant fills -->
+      <rect x="0"   y="0"   width="410" height="340" fill="#FDF1F0"/>
+      <rect x="410" y="0"   width="410" height="340" fill="#FEFAED"/>
+      <rect x="0"   y="340" width="410" height="340" fill="#EDF6F4"/>
+      <rect x="410" y="340" width="410" height="340" fill="#F3EEFA"/>
+
+      <!-- Quadrant border accents (inner top/bottom edges) -->
+      <rect x="0"   y="0"   width="410" height="340" fill="none" stroke="#F1CECA" stroke-width="1.5"/>
+      <rect x="410" y="0"   width="410" height="340" fill="none" stroke="#ECD98B" stroke-width="1.5"/>
+      <rect x="0"   y="340" width="410" height="340" fill="none" stroke="#A8D8D2" stroke-width="1.5"/>
+      <rect x="410" y="340" width="410" height="340" fill="none" stroke="#C8B3EC" stroke-width="1.5"/>
+
+      <!-- Bold dividers -->
+      <line x1="0" y1="340" x2="820" y2="340" stroke="#C8C4BC" stroke-width="2"/>
+      <line x1="410" y1="0" x2="410" y2="680" stroke="#C8C4BC" stroke-width="2"/>
+
+      <!-- KEYWORDS — bold, colored, prominent -->
+      <text x="205" y="36" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="0.1em" fill="#B83028">NEGATIVE</text>
+      <text x="615" y="36" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="0.1em" fill="#A06A00">MARGINAL</text>
+      <text x="205" y="654" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="0.1em" fill="#0B6157">DECISIVE</text>
+      <text x="615" y="654" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="0.1em" fill="#5227A0">TRANSFORMATIVE</text>
+
+      <!-- ─── BOX 1: NO DEAL ─── -->
+      <rect x="105" y="76" width="200" height="62" rx="10" fill="white" stroke="#E05050" stroke-width="1.8"/>
+      <text x="205" y="98" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#8B1C1C">1. No deal</text>
+      <text x="205" y="122" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#B03030">U.S. exits without change</text>
+
+      <!-- No Deal connectors (darker red) -->
+      <line x1="205" y1="138" x2="119" y2="188" stroke="#D04040" stroke-width="2.2" stroke-opacity="0.65"/>
+      <line x1="205" y1="138" x2="205" y2="238" stroke="#D04040" stroke-width="2.2" stroke-opacity="0.65"/>
+      <line x1="205" y1="138" x2="291" y2="188" stroke="#D04040" stroke-width="2.2" stroke-opacity="0.65"/>
+
+      <!-- No Deal satellites (semi-circle below) -->
+      <g class="sat-group" onclick="showModal('nd1')">
+        <circle cx="119" cy="188" r="44" fill="#FACACA" stroke="#E05050" stroke-width="2"/>
+        <text class="sat-label" x="119" y="181" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#7A1010">Regional</text>
+        <text class="sat-label" x="119" y="196" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#7A1010">power shifts</text>
+      </g>
+      <g class="sat-group" onclick="showModal('nd2')">
+        <circle cx="205" cy="242" r="44" fill="#FACACA" stroke="#E05050" stroke-width="2"/>
+        <text class="sat-label" x="205" y="235" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#7A1010">Global</text>
+        <text class="sat-label" x="205" y="250" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#7A1010">realignment</text>
+      </g>
+      <g class="sat-group" onclick="showModal('nd3')">
+        <circle cx="291" cy="188" r="44" fill="#FACACA" stroke="#E05050" stroke-width="2"/>
+        <text class="sat-label" x="291" y="181" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#7A1010">Mowing</text>
+        <text class="sat-label" x="291" y="196" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#7A1010">lawn narrative</text>
+      </g>
+
+      <!-- ─── BOX 2: WEAK DEAL ─── -->
+      <rect x="515" y="76" width="200" height="62" rx="10" fill="white" stroke="#D4900A" stroke-width="1.8"/>
+      <text x="615" y="98" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#6B3D00">2. Weak deal</text>
+      <text x="615" y="122" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#8A5200">Form without substance</text>
+
+      <!-- Weak Deal connectors -->
+      <line x1="615" y1="138" x2="529" y2="188" stroke="#C88010" stroke-width="2.2" stroke-opacity="0.65"/>
+      <line x1="615" y1="138" x2="615" y2="238" stroke="#C88010" stroke-width="2.2" stroke-opacity="0.65"/>
+      <line x1="615" y1="138" x2="701" y2="188" stroke="#C88010" stroke-width="2.2" stroke-opacity="0.65"/>
+
+      <!-- Weak Deal satellites -->
+      <g class="sat-group" onclick="showModal('wd1')">
+        <circle cx="529" cy="188" r="44" fill="#F8E4A0" stroke="#D4900A" stroke-width="2"/>
+        <text class="sat-label" x="529" y="181" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#5A3000">Weak Iranian</text>
+        <text class="sat-label" x="529" y="196" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#5A3000">counterpart</text>
+      </g>
+      <g class="sat-group" onclick="showModal('wd2')">
+        <circle cx="615" cy="242" r="44" fill="#F8E4A0" stroke="#D4900A" stroke-width="2"/>
+        <text class="sat-label" x="615" y="235" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#5A3000">Domestic win</text>
+        <text class="sat-label" x="615" y="250" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#5A3000">global doubt</text>
+      </g>
+      <g class="sat-group" onclick="showModal('wd3')">
+        <circle cx="701" cy="188" r="44" fill="#F8E4A0" stroke="#D4900A" stroke-width="2"/>
+        <text class="sat-label" x="701" y="181" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#5A3000">Near-term</text>
+        <text class="sat-label" x="701" y="196" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#5A3000">conflict risk</text>
+      </g>
+
+      <!-- ─── BOX 3: STRONG DEAL ─── -->
+      <rect x="105" y="542" width="200" height="62" rx="10" fill="white" stroke="#0F8C7A" stroke-width="1.8"/>
+      <text x="205" y="564" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#0A4A42">3. Strong deal</text>
+      <text x="205" y="588" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#0D6E62">Comprehensive, enforceable</text>
+
+      <!-- Strong Deal connectors (going up) -->
+      <line x1="205" y1="542" x2="119" y2="492" stroke="#0A8870" stroke-width="2.2" stroke-opacity="0.65"/>
+      <line x1="205" y1="542" x2="205" y2="442" stroke="#0A8870" stroke-width="2.2" stroke-opacity="0.65"/>
+      <line x1="205" y1="542" x2="291" y2="492" stroke="#0A8870" stroke-width="2.2" stroke-opacity="0.65"/>
+
+      <!-- Strong Deal satellites (semi-circle above) -->
+      <g class="sat-group" onclick="showModal('sd1')">
+        <circle cx="119" cy="492" r="44" fill="#B0E6DC" stroke="#0F8C7A" stroke-width="2"/>
+        <text class="sat-label" x="119" y="485" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#083D35">Stable Iranian</text>
+        <text class="sat-label" x="119" y="500" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#083D35">counterpart</text>
+      </g>
+      <g class="sat-group" onclick="showModal('sd2')">
+        <circle cx="205" cy="438" r="44" fill="#B0E6DC" stroke="#0F8C7A" stroke-width="2"/>
+        <text class="sat-label" x="205" y="431" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#083D35">Credible</text>
+        <text class="sat-label" x="205" y="446" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#083D35">enforcement</text>
+      </g>
+      <g class="sat-group" onclick="showModal('sd3')">
+        <circle cx="291" cy="492" r="44" fill="#B0E6DC" stroke="#0F8C7A" stroke-width="2"/>
+        <text class="sat-label" x="291" y="485" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#083D35">Missile +</text>
+        <text class="sat-label" x="291" y="500" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#083D35">nuclear limits</text>
+      </g>
+
+      <!-- ─── BOX 4: COMPLETE VICTORY ─── -->
+      <rect x="515" y="542" width="200" height="62" rx="10" fill="white" stroke="#7040C8" stroke-width="1.8"/>
+      <text x="615" y="564" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#3A1880">4. Complete victory</text>
+      <text x="615" y="588" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5C2EA0">Regime change in Iran</text>
+
+      <!-- Complete Victory connectors -->
+      <line x1="615" y1="542" x2="529" y2="492" stroke="#6832B8" stroke-width="2.2" stroke-opacity="0.65"/>
+      <line x1="615" y1="542" x2="615" y2="442" stroke="#6832B8" stroke-width="2.2" stroke-opacity="0.65"/>
+      <line x1="615" y1="542" x2="701" y2="492" stroke="#6832B8" stroke-width="2.2" stroke-opacity="0.65"/>
+
+      <!-- Complete Victory satellites -->
+      <g class="sat-group" onclick="showModal('cv1')">
+        <circle cx="529" cy="492" r="44" fill="#D8C8F8" stroke="#7040C8" stroke-width="2"/>
+        <text class="sat-label" x="529" y="485" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#2E1060">Highest-risk</text>
+        <text class="sat-label" x="529" y="500" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#2E1060">scenario</text>
+      </g>
+      <g class="sat-group" onclick="showModal('cv2')">
+        <circle cx="615" cy="438" r="44" fill="#D8C8F8" stroke="#7040C8" stroke-width="2"/>
+        <text class="sat-label" x="615" y="431" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#2E1060">Broad intl</text>
+        <text class="sat-label" x="615" y="446" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#2E1060">support needed</text>
+      </g>
+      <g class="sat-group" onclick="showModal('cv3')">
+        <circle cx="701" cy="492" r="44" fill="#D8C8F8" stroke="#7040C8" stroke-width="2"/>
+        <text class="sat-label" x="701" y="485" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#2E1060">Global security</text>
+        <text class="sat-label" x="701" y="500" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="#2E1060">realignment</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <p class="hint">&#9673; Click or tap any bubble to read the full strategic analysis</p>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    <div class="modal-tag" id="mTag"></div>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  nd1: {
+    tag:'No Deal', bg:'#FACACA', tc:'#8B1C1C',
+    title:'Regional Power Shifts',
+    body:'A U.S. withdrawal without meaningful agreement triggers immediate reassessment across the region. Countries that have been hedging — Saudi Arabia, UAE, Qatar, Turkey — will accelerate moves toward alternative security frameworks. The vacuum does not stay empty. China and Russia fill it.\n\nThis follows the same pattern as every previous U.S. disengagement without a political settlement. The difference here is the proximity to nuclear capability and the density of proxy networks. The regional consequences are not delayed — they begin the day the talks collapse.'
+  },
+  nd2: {
+    tag:'No Deal', bg:'#FACACA', tc:'#8B1C1C',
+    title:'Global Realignment',
+    body:'Beyond the region, a failed diplomatic exit signals systemic weakness in the Western-led multilateral framework. Allies in Asia, Europe, and Africa independently recalibrate their security calculus. The credibility cost is not regional — it is global.\n\nEvery alliance commitment becomes marginally less credible. Every adversary becomes marginally more emboldened. The compounding effect matters. Countries do not announce recalibrations — they quietly accelerate defence spending, hedge currency reserves, and sign memoranda of understanding with counterparts they previously kept at arm\'s length.'
+  },
+  nd3: {
+    tag:'No Deal', bg:'#FACACA', tc:'#8B1C1C',
+    title:'The Mowing the Lawn Problem',
+    body:'The phrase normalises strategic failure as tactical necessity. Periodic military action to suppress — not resolve — threats becomes the default posture. Each cycle costs lives, credibility, and political capital. Each cycle is presented domestically as a success.\n\nThe regional and humanitarian consequences are systematically obscured by the language. Infrastructure degradation, supply chain disruption, and displacement compound with each cycle. The lawn grows back. It always does — because the conditions that produced the threat are never addressed.'
+  },
+  wd1: {
+    tag:'Weak Deal', bg:'#F8E4A0', tc:'#6B3D00',
+    title:'Counterpart Authority',
+    body:'A deal is only as durable as the authority of those who sign it. If the Iranian signatory lacks command over the IRGC, the parallel nuclear programme, or domestic hardliners, any agreement is provisional at best.\n\nYou need the people who actually control the capability at the table — or close enough to it that the signature carries operational weight. A Foreign Ministry agreement without Supreme Leader mandate and IRGC compliance is a formality. The JCPOA ran into exactly this: the programme continued in areas the deal did not formally cover, because the people who controlled those areas were not bound by what was signed.'
+  },
+  wd2: {
+    tag:'Weak Deal', bg:'#F8E4A0', tc:'#6B3D00',
+    title:'The Perception Gap',
+    body:'A deal framed as a political victory in Washington may be read very differently in Brussels, Riyadh, Jerusalem, or Beijing. If allies, adversaries, and markets collectively assess it as cosmetic, the diplomatic capital spent is wasted and the deterrent signal is undermined.\n\nPerception is reality in arms control. A deal nobody believes in does not deter. It may in fact do the opposite — signalling that the red lines announced before negotiation were not in fact red lines, and that further provocation will be met with further negotiation rather than consequence.'
+  },
+  wd3: {
+    tag:'Weak Deal', bg:'#F8E4A0', tc:'#6B3D00',
+    title:'Deferred, Not Resolved',
+    body:'A weak deal extends the timeline before the next crisis. It does not remove the underlying threat architecture: enriched stockpiles, missile capability, proxy networks, and ideological commitment to the programme remain intact.\n\nThe question is not whether conflict comes — it is whether the deal buys enough time to build a better solution, or just enough time to forget the problem. History suggests the latter. The conditions for renewed escalation persist. The gap between crises closes. And the next negotiation begins from a weaker position, with less credibility and less leverage than the last.'
+  },
+  sd1: {
+    tag:'Strong Deal', bg:'#B0E6DC', tc:'#083D35',
+    title:'The Foundational Requirement',
+    body:'The single most important variable in a Strong Deal is not the text — it is the counterpart. You need a signatory with genuine executive authority over the IRGC and the nuclear programme.\n\nThis requires an Iranian political moment where the decision to deal is made at the top, not delegated down. It means the Supreme Leader has either sanctioned the agreement directly or the leadership transition has produced someone with comparable authority who has. Without this, the deal exists on paper. The infrastructure that makes Iran a threat — the centrifuges, the missiles, the proxies — remains under command of people who did not agree to anything.'
+  },
+  sd2: {
+    tag:'Strong Deal', bg:'#B0E6DC', tc:'#083D35',
+    title:'What Credible Enforcement Requires',
+    body:'Continuous, intrusive, non-negotiable IAEA access — including military sites. Any-time, any-place inspection rights not subject to Iranian consent on a case-by-case basis. Physical removal of enriched uranium stockpiles, not capping. Automatic snapback mechanisms that cannot be vetoed at the Security Council.\n\nThe JCPOA had the architecture but not the teeth. A Strong Deal needs both. Without enforcement, it is a Weak Deal with better marketing. The breakout timeline calculation is only meaningful if the fissile material is physically outside the country and the centrifuge production lines are genuinely constrained — not paused, not monitored, constrained.'
+  },
+  sd3: {
+    tag:'Strong Deal', bg:'#B0E6DC', tc:'#083D35',
+    title:'Both Tracks, Not One',
+    body:'Constraining enrichment without addressing missile delivery architecture leaves the threat partially intact. You have removed the warhead but left the launch system. A truly strong deal covers both tracks: uranium enrichment limits with physical material removal, and meaningful constraints on ballistic missile development.\n\nCovering only the nuclear track is the diplomatic equivalent of removing the bullet but leaving the gun — and the ammunition factory, and the training programme. Allies in the region — particularly Israel and Saudi Arabia — will not accept a deal that neutralises the nuclear track while leaving the missile programme unconstrained. Their calculus is correct.'
+  },
+  cv1: {
+    tag:'Complete Victory', bg:'#D8C8F8', tc:'#2E1060',
+    title:'The Risk Architecture',
+    body:'Internal upheaval leading to fundamental regime change is the highest-stakes outcome on the board. The probability of miscalculation, escalation, and humanitarian cost is substantial. The 2–3 week window often referenced in strategic analysis is almost certainly insufficient for a transition of this magnitude.\n\nRegime transitions of this complexity typically take months to years. The interim period — when the old order is gone but the new one is not yet established — is where the greatest danger lies. Proxy forces do not stand down because the government changed. Nuclear material does not secure itself. And external actors who benefit from instability will not wait passively.'
+  },
+  cv2: {
+    tag:'Complete Victory', bg:'#D8C8F8', tc:'#2E1060',
+    title:'The Coalition Requirement',
+    body:'A regime transition of this magnitude cannot be managed unilaterally. It requires coordinated international legitimacy: diplomatic recognition of successor authority, economic frameworks to prevent collapse, and security arrangements to fill the vacuum before proxies or regional powers move to fill it themselves.\n\nThe 2003 error was treating regime removal and successful transition as the same problem. They are not. Removing a government takes days. Building a successor state takes years. The morning after is where the real work begins — and where international support either arrives in time or does not.'
+  },
+  cv3: {
+    tag:'Complete Victory', bg:'#D8C8F8', tc:'#2E1060',
+    title:'The Long-Term Stakes',
+    body:'If achieved on stable terms — a large conditional — Complete Victory would represent a generational shift in the regional and global security architecture. The comparison to the post-Cold War realignment is not hyperbolic: energy markets, alliance structures, nuclear non-proliferation dynamics, and the strategic balance across the Middle East and beyond would all be materially affected.\n\nThis is why it carries the highest risk and the highest potential reward simultaneously. The temptation is to pursue it without adequate preparation for the transition phase. That is where the scenario most commonly fails — not in the overthrow, but in the aftermath.'
+  }
+};
+
+function showModal(key) {
+  const d = DATA[key];
+  const tag = document.getElementById('mTag');
+  tag.textContent = d.tag;
+  tag.style.background = d.bg;
+  tag.style.color = d.tc;
+  document.getElementById('mTitle').textContent = d.title;
+  const body = document.getElementById('mBody');
+  body.innerHTML = '';
+  d.body.split('\n\n').forEach(para => {
+    const p = document.createElement('p');
+    p.style.cssText = 'margin-bottom: 0.85em;';
+    p.textContent = para;
+    body.appendChild(p);
+  });
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
