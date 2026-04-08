@@ -979,7 +979,6 @@ const AIRTABLE_CONFIG = {
   let allOrders = [];
   let accountMap = {};
   let quoteMap = {};
-  let quoteMap = {};
 
   // Tab-specific state
   let deals_oppFilter = 'all';
@@ -1063,6 +1062,8 @@ const AIRTABLE_CONFIG = {
       accountRecords.forEach(r => {
         accountMap[r.id] = r.fields['Name'] || r.fields['Account Name'] || r.id;
       });
+      quoteMap = {};
+      quoteRecords.forEach(r => { quoteMap[r.id] = r.fields['Quote Number'] || r.id; });
 
       allOpps = oppRecords;
       allQuotes = quoteRecords;
