@@ -923,7 +923,7 @@ const AIRTABLE_CONFIG = {
 
   <!-- TAB 3: ORDER BANK -->
   <div id="tabOrders" class="tab-content">
-    <div class="summary-row three-col" id="orders-kpi">
+    <div class="summary-row" id="orders-kpi">
       <div class="card"><div class="card-label">Active Orders</div><div class="card-value accent" id="orders-kpiActive">—</div></div>
       <div class="card"><div class="card-label">Active Value</div><div class="card-value accent" id="orders-kpiValue">—</div></div>
       <div class="card"><div class="card-label">In Production</div><div class="card-value purple" style="color:var(--purple)" id="orders-kpiProduction">—</div></div>
@@ -1168,7 +1168,7 @@ const AIRTABLE_CONFIG = {
   function deals_renderKPIs() {
     const active = allOpps.filter(r => !['Won','Lost'].includes(r.fields['Stage']));
     const pipeline = active.reduce((s, r) => s + (r.fields['Total Quoted Value'] || 0), 0);
-    const weighted = allOpps.reduce((s, r) => s + (r.fields['Weighted Value'] || 0), 0);
+    const weighted = active.reduce((s, r) => s + (r.fields['Weighted Value'] || 0), 0);
     const won = allOpps.filter(r => r.fields['Stage'] === 'Won').length;
 
     const today = new Date(); today.setHours(0,0,0,0);
@@ -1422,7 +1422,7 @@ const AIRTABLE_CONFIG = {
         <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);font-weight:500;">${esc(f['Quote Number'] || '—')}</td>
         <td style="font-size:12px;color:var(--ink2);">${esc(f['RFQ Reference'] || '—')}</td>
         <td style="font-size:13px;font-weight:600;">${esc(f['Account'] ? (accountMap[f['Account'][0]] || f['Account'][0]) : '—')}</td>
-        <td><span class="badge ${quotes_productBadge(f['Quote Status'])}">${esc(status) || '—'}</span></td>
+        <td><span class="badge ${deals_statusBadge(status)}">${esc(status) || '—'}</span></td>
         <td class="val-cell ${val > 100000 ? 'high' : val > 20000 ? 'med' : ''}">${quotes_fmtUSD(val)}</td>
         <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink3);">${esc(f['Currency'] || 'USD')}</td>
         <td style="font-size:11px;color:var(--ink3);font-family:'IBM Plex Mono',monospace;">${esc(f['Product Category'] || '—')}</td>
@@ -1498,7 +1498,7 @@ const AIRTABLE_CONFIG = {
   }
 
   function orders_marginClass(margin) {
-    if (margin >= 20) return 'margin-good';
+    if (margin >= 0.20) return 'margin-good';
     if (margin >= 0) return 'margin-warn';
     return 'margin-bad';
   }
@@ -1652,7 +1652,7 @@ const AIRTABLE_CONFIG = {
           <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink3);">${ccy}</td>
           <td class="val-cell">${orders_fmtVal(usd, 'USD')}</td>
           <td class="date-cell ${shipClass}">${shipStr}</td>
-          <td class="val-cell ${marginClass}">${margin ? margin.toFixed(1) + '%' : '—'}</td>
+          <td class="val-cell ${marginClass}">${margin ? (margin * 100).toFixed(1) + '%' : '—'}</td>
           <td style="font-size:12px;color:var(--ink2);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(f['Order Notes'] || '—')}</td>
         </tr>`;
       }).join('');
@@ -1718,7 +1718,7 @@ const AIRTABLE_CONFIG = {
 
     let html = '';
     primary.forEach(k => {
-      if (fields.includes(k) && f[k]) {
+      if (fields.includes(k) && f[k] !== undefined && f[k] !== null && f[k] !== '') {
         const val = formatFieldValue(k, f[k]);
         html += `<div class="panel-field"><div class="panel-field-label">${esc(k)}</div><div class="panel-field-value">${val}</div></div>`;
       }
