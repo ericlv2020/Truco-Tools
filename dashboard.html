@@ -978,6 +978,8 @@ const AIRTABLE_CONFIG = {
   let allQuotes = [];
   let allOrders = [];
   let accountMap = {};
+  let quoteMap = {};
+  let quoteMap = {};
 
   // Tab-specific state
   let deals_oppFilter = 'all';
@@ -1716,7 +1718,7 @@ const AIRTABLE_CONFIG = {
     let html = '';
     primary.forEach(k => {
       if (fields.includes(k) && f[k]) {
-        const val = formatFieldValue(f[k], type);
+        const val = formatFieldValue(k, f[k]);
         html += `<div class="panel-field"><div class="panel-field-label">${esc(k)}</div><div class="panel-field-value">${val}</div></div>`;
       }
     });
@@ -1725,7 +1727,7 @@ const AIRTABLE_CONFIG = {
       html += '<div class="panel-divider">Additional Fields</div>';
       others.forEach(k => {
         if (f[k]) {
-          const val = formatFieldValue(f[k], type);
+          const val = formatFieldValue(k, f[k]);
           html += `<div class="panel-field"><div class="panel-field-label">${esc(k)}</div><div class="panel-field-value">${val}</div></div>`;
         }
       });
@@ -1736,14 +1738,31 @@ const AIRTABLE_CONFIG = {
     panel.classList.add('open');
   }
 
-  function formatFieldValue(val, type) {
+  function formatFieldValue(key, val) {
+    if (val === null || val === undefined || val === '') return String.fromCharCode(8212);
+    if (typeof val === 'object' && !Array.isArray(val)) {
+      if (val.name) return esc(val.name);
+      if (val.email) return esc(val.email);
+      return String.fromCharCode(8212);
+    }
     if (Array.isArray(val)) {
+      if (!val.length) return String.fromCharCode(8212);
       return val.map(v => {
-        if (typeof v === 'object' && v.id) return esc(accountMap[v.id] || v.id);
+        if (typeof v === 'object' && v !== null) {
+          if (v.name) return esc(v.name);
+          if (v.id && accountMap[v.id]) return esc(accountMap[v.id]);
+          if (v.id) return esc(v.id);
+          return esc(String(v));
+        }
+        if (typeof v === 'string') return esc(accountMap[v] || quoteMap[v] || v);
         return esc(String(v));
       }).join(', ');
     }
-    if (typeof val === 'number') return val.toLocaleString();
+    if (typeof val === 'number') {
+      const kl = (key || '').toLowerCase();
+      if (kl.includes('%') || kl.includes('percent')) return (val * 100).toFixed(1) + '%';
+      return val.toLocaleString();
+    }
     if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)) {
       return new Date(val).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     }
