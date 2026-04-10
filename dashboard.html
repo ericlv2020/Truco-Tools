@@ -1004,7 +1004,7 @@ const AIRTABLE_CONFIG = {
       <div class="card"><div class="card-label">Pipeline Value</div><div class="card-value accent" id="deals-kpiPipeline">—</div><div class="card-sub">Total quoted</div></div>
       <div class="card"><div class="card-label">Weighted Value</div><div class="card-value" id="deals-kpiWeighted">—</div><div class="card-sub">Probability adj.</div></div>
       <div class="card"><div class="card-label">Overdue Follow-Up</div><div class="card-value red" id="deals-kpiOverdue">—</div><div class="card-sub">Quotes past due</div></div>
-      <div class="card"><div class="card-label">Won (All Time)</div><div class="card-value won" id="deals-kpiWon">—</div></div>
+      <div class="card"><div class="card-label">Active Orders</div><div class="card-value won" id="deals-kpiWon">—</div></div>
     </div>
 
     <div>
@@ -1371,7 +1371,7 @@ const AIRTABLE_CONFIG = {
     const active = fyOpps.filter(r => !['Won','Lost'].includes(r.fields['Stage']));
     const pipeline = active.reduce((s, r) => s + (r.fields['Total Quoted Value'] || 0), 0);
     const weighted = active.reduce((s, r) => s + (r.fields['Weighted Value'] || 0), 0);
-    const won = fyOpps.filter(r => r.fields['Stage'] === 'Won').length;
+    const won = applyFY(allOrders, 'Order Date').filter(r => !['shipped','closed'].includes((r.fields['Order Status'] || '').toLowerCase())).length;
 
     const today = new Date(); today.setHours(0,0,0,0);
     const fyQuotesKpi = applyFY(allQuotes, 'Quote Date');
