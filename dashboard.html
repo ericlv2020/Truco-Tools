@@ -800,7 +800,7 @@ const AIRTABLE_CONFIG = {
     return new Date(s.getFullYear() + 1, 5, 30, 23, 59, 59);
   }
   function inFY(dateStr) {
-    if (!dateStr) return true;
+    if (!dateStr) return false;
     const d = new Date(dateStr);
     return d >= getFYStart() && d <= getFYEnd();
   }
