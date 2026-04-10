@@ -1093,6 +1093,25 @@ const AIRTABLE_CONFIG = {
 
   <!-- TAB 3: ORDER BANK -->
   <div id="tabOrders" class="tab-content">
+    <!-- FY Financial Summary Row -->
+    <div class="summary-row" id="orders-kpi-financial">
+      <div class="card">
+        <div class="card-label">Completed (FY)</div>
+        <div class="card-value gold" id="orders-kpiCompleted">—</div>
+        <div class="card-sub">Closed + Shipped + Delivered</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Active (FY)</div>
+        <div class="card-value accent" id="orders-kpiActiveFin">—</div>
+        <div class="card-sub">Confirmed + Prod + Ready + Hold</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Total Order Bank (FY)</div>
+        <div class="card-value won" id="orders-kpiTotal">—</div>
+        <div class="card-sub">All FY orders</div>
+      </div>
+    </div>
+
     <div class="summary-row" id="orders-kpi">
       <div class="card"><div class="card-label">Active Orders</div><div class="card-value accent" id="orders-kpiActive">—</div></div>
       <div class="card"><div class="card-label">Active Value</div><div class="card-value accent" id="orders-kpiValue">—</div></div>
@@ -1711,20 +1730,30 @@ const AIRTABLE_CONFIG = {
 
   function orders_renderKPIs() {
     const fyOrders = applyFY(allOrders, 'Order Date');
-    const active = fyOrders.filter(r => {
-      const status = (r.fields['Order Status'] || '').toLowerCase();
-      return !['shipped'].includes(status);
-    });
-    const activeVal = active.reduce((s, r) => s + (r.fields['Order Value (USD)'] || 0), 0);
-    const production = active.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'in production').length;
-    const ready = active.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'ready to ship').length;
-    const hold = fyOrders.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'on hold').length;
+    const completedStatuses = ['shipped', 'closed', 'delivered'];
+    const activeStatuses   = ['in production', 'ready to ship', 'on hold', 'confirmed', 'new'];
 
-    document.getElementById('orders-kpiActive').textContent = active.length;
-    document.getElementById('orders-kpiValue').textContent = orders_fmtVal(activeVal, 'USD');
+    const completed = fyOrders.filter(r => completedStatuses.includes((r.fields['Order Status'] || '').toLowerCase()));
+    const activeFin = fyOrders.filter(r => activeStatuses.includes((r.fields['Order Status'] || '').toLowerCase()));
+    const active    = fyOrders.filter(r => !completedStatuses.includes((r.fields['Order Status'] || '').toLowerCase()));
+
+    const completedVal = completed.reduce((s, r) => s + (r.fields['Order Value (USD)'] || 0), 0);
+    const activeFinVal = activeFin.reduce((s, r) => s + (r.fields['Order Value (USD)'] || 0), 0);
+    const activeVal    = active.reduce((s, r) => s + (r.fields['Order Value (USD)'] || 0), 0);
+    const totalVal     = completedVal + activeFinVal;
+
+    const production = activeFin.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'in production').length;
+    const ready      = activeFin.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'ready to ship').length;
+    const hold       = activeFin.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'on hold').length;
+
+    document.getElementById('orders-kpiCompleted').textContent  = orders_fmtVal(completedVal, 'USD');
+    document.getElementById('orders-kpiActiveFin').textContent  = orders_fmtVal(activeFinVal, 'USD');
+    document.getElementById('orders-kpiTotal').textContent      = orders_fmtVal(totalVal, 'USD');
+    document.getElementById('orders-kpiActive').textContent     = active.length;
+    document.getElementById('orders-kpiValue').textContent      = orders_fmtVal(activeVal, 'USD');
     document.getElementById('orders-kpiProduction').textContent = production;
-    document.getElementById('orders-kpiReady').textContent = ready;
-    document.getElementById('orders-kpiHold').textContent = hold;
+    document.getElementById('orders-kpiReady').textContent      = ready;
+    document.getElementById('orders-kpiHold').textContent       = hold;
   }
 
   function orders_renderAccountGrid() {
