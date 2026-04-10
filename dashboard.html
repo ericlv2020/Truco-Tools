@@ -19,29 +19,29 @@ const AIRTABLE_CONFIG = {
 </script>
 <style>
   :root {
-    --bg: #f5f0e8;
-    --surface: #faf7f2;
-    --surface2: #ede8de;
-    --border: #d8d0c0;
-    --ink: #1a1612;
-    --ink2: #5a5248;
-    --ink3: #9a9288;
-    --accent: #1a3d2b;
-    --accent-light: #e8f0eb;
-    --gold: #b8860b;
-    --gold-light: #fdf5e0;
-    --red: #8b1a1a;
-    --red-light: #fde8e8;
-    --blue: #1a2d5a;
-    --blue-light: #e8ecf5;
-    --won-bg: #e8f5ee;
-    --won-fg: #1a5c35;
-    --lost-bg: #f5e8e8;
-    --lost-fg: #8b1a1a;
-    --purple: #5b21b6;
-    --purple-light: #f0ebf8;
-    --cyan: #0e5e6f;
-    --cyan-light: #e6f4f6;
+    --bg: #0b1622;
+    --surface: #152032;
+    --surface2: #1e2f45;
+    --border: #2a4060;
+    --ink: #e2eaf4;
+    --ink2: #94aec8;
+    --ink3: #5a7a9a;
+    --accent: #1e6fd6;
+    --accent-light: #142540;
+    --gold: #f0b429;
+    --gold-light: #241c08;
+    --red: #e05555;
+    --red-light: #2a1010;
+    --blue: #3a8fd4;
+    --blue-light: #0e1e30;
+    --won-bg: #0e2a1a;
+    --won-fg: #4ade80;
+    --lost-bg: #2a1010;
+    --lost-fg: #e05555;
+    --purple: #a78bfa;
+    --purple-light: #1a1530;
+    --cyan: #22c5e0;
+    --cyan-light: #081820;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -789,6 +789,34 @@ const AIRTABLE_CONFIG = {
     .toolbar-right { margin-left: 0; width: 100%; }
     .search-input { width: 100%; min-width: auto; }
   }
+  // FY HELPERS
+  function getFYStart() {
+    const now = new Date();
+    const yr = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+    return new Date(yr, 6, 1);
+  }
+  function getFYEnd() {
+    const s = getFYStart();
+    return new Date(s.getFullYear() + 1, 5, 30, 23, 59, 59);
+  }
+  function inFY(dateStr) {
+    if (!dateStr) return true;
+    const d = new Date(dateStr);
+    return d >= getFYStart() && d <= getFYEnd();
+  }
+  function applyFY(records, dateField) {
+    if (fyFilter === 'all') return records;
+    return records.filter(r => inFY(r.fields[dateField]));
+  }
+  function toggleFY() {
+    fyFilter = fyFilter === 'current' ? 'all' : 'current';
+    document.querySelectorAll('.fy-toggle').forEach(btn => {
+      btn.textContent = fyFilter === 'current' ? 'FY 25/26' : 'All Time';
+      btn.classList.toggle('fy-active', fyFilter === 'current');
+    });
+    renderActiveTab();
+  }
+
   /* -- TYPOGRAPHY SCALE ---------------------------------------- */
   /* All non-KPI UI elements. .card-value/.card-label/.card-sub excluded. */
   .wordmark              { font-size: 24px; }
@@ -820,6 +848,8 @@ const AIRTABLE_CONFIG = {
   .auth-input            { font-size: 16px; }
   .auth-btn              { font-size: 14px; }
   .auth-error            { font-size: 13px; }
+  .fy-toggle { background: var(--surface2); border: 1px solid var(--border); color: var(--ink3); padding: 6px 14px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .fy-toggle.fy-active { background: var(--accent); border-color: var(--accent); color: #fff; }
 </style>
 </head>
 <body>
@@ -852,6 +882,7 @@ const AIRTABLE_CONFIG = {
   </div>
   <div class="header-right">
     <span class="last-updated" id="lastUpdated">—</span>
+    <button class="fy-toggle fy-active" onclick="toggleFY()">FY 25/26</button>
     <button class="refresh-btn" onclick="loadAllData()">⟳ Refresh</button>
   </div>
 </header>
@@ -1017,6 +1048,7 @@ const AIRTABLE_CONFIG = {
   let quotes_filter = 'all';
   let quotes_sortCol = 'Quote Date';
   let quotes_sortDir = 'desc';
+  let fyFilter = 'current';
 
   // ── INIT ───────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
@@ -1197,13 +1229,15 @@ const AIRTABLE_CONFIG = {
   }
 
   function deals_renderKPIs() {
-    const active = allOpps.filter(r => !['Won','Lost'].includes(r.fields['Stage']));
+    const fyOpps = applyFY(allOpps, 'Expected Closure Date');
+    const active = fyOpps.filter(r => !['Won','Lost'].includes(r.fields['Stage']));
     const pipeline = active.reduce((s, r) => s + (r.fields['Total Quoted Value'] || 0), 0);
     const weighted = active.reduce((s, r) => s + (r.fields['Weighted Value'] || 0), 0);
-    const won = allOpps.filter(r => r.fields['Stage'] === 'Won').length;
+    const won = fyOpps.filter(r => r.fields['Stage'] === 'Won').length;
 
     const today = new Date(); today.setHours(0,0,0,0);
-    const overdue = allQuotes.filter(r => {
+    const fyQuotesKpi = applyFY(allQuotes, 'Quote Date');
+    const overdue = fyQuotesKpi.filter(r => {
       const d = r.fields['Follow-Up Date'];
       if (!d) return false;
       return new Date(d) < today && r.fields['Quote Status'] !== 'Won' && r.fields['Quote Status'] !== 'Lost';
@@ -1217,9 +1251,10 @@ const AIRTABLE_CONFIG = {
   }
 
   function deals_renderOpps() {
+    const fyOppsR = applyFY(allOpps, 'Expected Closure Date');
     const filtered = deals_oppFilter === 'all'
-      ? allOpps
-      : allOpps.filter(r => (r.fields['Stage'] || '') === deals_oppFilter);
+      ? fyOppsR
+      : fyOppsR.filter(r => (r.fields['Stage'] || '') === deals_oppFilter);
 
     document.getElementById('deals-oppCount').textContent = filtered.length + ' records';
 
@@ -1269,7 +1304,8 @@ const AIRTABLE_CONFIG = {
   }
 
   function deals_renderQuotes() {
-    const sorted = [...allQuotes].sort((a, b) => {
+    const fyQuotes = applyFY(allQuotes, 'Quote Date');
+    const sorted = [...fyQuotes].sort((a, b) => {
       const da = new Date(a.fields['Quote Date'] || 0);
       const db = new Date(b.fields['Quote Date'] || 0);
       return db - da;
@@ -1535,14 +1571,15 @@ const AIRTABLE_CONFIG = {
   }
 
   function orders_renderKPIs() {
-    const active = allOrders.filter(r => {
+    const fyOrders = applyFY(allOrders, 'Order Date');
+    const active = fyOrders.filter(r => {
       const status = (r.fields['Order Status'] || '').toLowerCase();
       return !['shipped'].includes(status);
     });
     const activeVal = active.reduce((s, r) => s + (r.fields['Order Value (USD)'] || 0), 0);
     const production = active.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'in production').length;
     const ready = active.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'ready to ship').length;
-    const hold = allOrders.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'on hold').length;
+    const hold = fyOrders.filter(r => (r.fields['Order Status'] || '').toLowerCase() === 'on hold').length;
 
     document.getElementById('orders-kpiActive').textContent = active.length;
     document.getElementById('orders-kpiValue').textContent = orders_fmtVal(activeVal, 'USD');
@@ -1553,7 +1590,7 @@ const AIRTABLE_CONFIG = {
 
   function orders_renderAccountGrid() {
     const accountValues = {};
-    allOrders.forEach(r => {
+    applyFY(allOrders, 'Order Date').forEach(r => {
       const status = (r.fields['Order Status'] || '').toLowerCase();
       if (!['shipped'].includes(status)) {
         const acctId = r.fields['Account'] ? r.fields['Account'][0] : null;
@@ -1583,7 +1620,7 @@ const AIRTABLE_CONFIG = {
     const items = [];
     const today = new Date(); today.setHours(0,0,0,0);
 
-    allOrders.forEach(r => {
+    applyFY(allOrders, 'Order Date').forEach(r => {
       const status = (r.fields['Order Status'] || '').toLowerCase();
       const acct = r.fields['Account'] ? accountMap[r.fields['Account'][0]] : '—';
       const po = r.fields['Customer PO Number'] || '—';
@@ -1637,14 +1674,14 @@ const AIRTABLE_CONFIG = {
     let html = '';
 
     statuses.forEach(status => {
-      const filtered = allOrders.filter(r => {
+      const filtered = applyFY(allOrders, 'Order Date').filter(r => {
         const s = (r.fields['Order Status'] || '').toLowerCase();
         return statusMap[s] === status;
       });
 
       if (status === 'Confirmed' && filtered.length > 15) {
         filtered.splice(15);
-        const remaining = allOrders.filter(r => {
+        const remaining = applyFY(allOrders, 'Order Date').filter(r => {
           const s = (r.fields['Order Status'] || '').toLowerCase();
           return statusMap[s] === status;
         }).length - 15;
