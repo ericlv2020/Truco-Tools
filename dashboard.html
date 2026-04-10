@@ -1039,6 +1039,7 @@ const AIRTABLE_CONFIG = {
   }
   function applyFY(records, dateField) {
     if (fyFilter === 'all') return records;
+    if (dateField === '__createdTime__') return records.filter(r => inFY(r.createdTime));
     return records.filter(r => inFY(r.fields[dateField]));
   }
   function toggleFY() {
@@ -1231,7 +1232,7 @@ const AIRTABLE_CONFIG = {
   }
 
   function deals_renderKPIs() {
-    const fyOpps = applyFY(allOpps, 'Expected Closure Date');
+    const fyOpps = applyFY(allOpps, '__createdTime__');
     const active = fyOpps.filter(r => !['Won','Lost'].includes(r.fields['Stage']));
     const pipeline = active.reduce((s, r) => s + (r.fields['Total Quoted Value'] || 0), 0);
     const weighted = active.reduce((s, r) => s + (r.fields['Weighted Value'] || 0), 0);
@@ -1253,7 +1254,7 @@ const AIRTABLE_CONFIG = {
   }
 
   function deals_renderOpps() {
-    const fyOppsR = applyFY(allOpps, 'Expected Closure Date');
+    const fyOppsR = applyFY(allOpps, '__createdTime__');
     const filtered = deals_oppFilter === 'all'
       ? fyOppsR
       : fyOppsR.filter(r => (r.fields['Stage'] || '') === deals_oppFilter);
