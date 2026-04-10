@@ -216,7 +216,7 @@ const AIRTABLE_CONFIG = {
   /* ALERT BOX */
   .alert-box {
     background: var(--red-light);
-    border: 1px solid #e8c0c0;
+    border: 1px solid var(--red);
     color: var(--red);
     border-radius: 6px;
     padding: 12px 16px;
@@ -338,7 +338,7 @@ const AIRTABLE_CONFIG = {
   }
 
   th.sortable:hover {
-    background: #ddd9ce;
+    background: var(--surface2);
   }
 
   td {
@@ -351,7 +351,7 @@ const AIRTABLE_CONFIG = {
   tr:last-child td { border-bottom: none; }
 
   tr.clickable { cursor: pointer; }
-  tr.clickable:hover td { background: #ebe7de; }
+  tr.clickable:hover td { background: var(--surface2); }
 
   tr.row-overdue td {
     background: var(--red-light);
@@ -487,7 +487,7 @@ const AIRTABLE_CONFIG = {
   /* NEEDS ATTENTION */
   .needs-attention {
     background: var(--red-light);
-    border: 1px solid #e8c0c0;
+    border: 1px solid var(--red);
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 28px;
@@ -510,7 +510,7 @@ const AIRTABLE_CONFIG = {
     font-size: 11px;
     color: var(--red);
     padding: 6px 0;
-    border-bottom: 1px solid #f5e8e8;
+    border-bottom: 1px solid var(--red-light);
   }
 
   .needs-attention-item:last-child {
@@ -542,7 +542,7 @@ const AIRTABLE_CONFIG = {
 
   .error-msg {
     background: var(--red-light);
-    border: 1px solid #e8c0c0;
+    border: 1px solid var(--red);
     color: var(--red);
     border-radius: 6px;
     padding: 12px 16px;
@@ -789,33 +789,6 @@ const AIRTABLE_CONFIG = {
     .toolbar-right { margin-left: 0; width: 100%; }
     .search-input { width: 100%; min-width: auto; }
   }
-  // FY HELPERS
-  function getFYStart() {
-    const now = new Date();
-    const yr = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
-    return new Date(yr, 6, 1);
-  }
-  function getFYEnd() {
-    const s = getFYStart();
-    return new Date(s.getFullYear() + 1, 5, 30, 23, 59, 59);
-  }
-  function inFY(dateStr) {
-    if (!dateStr) return false;
-    const d = new Date(dateStr);
-    return d >= getFYStart() && d <= getFYEnd();
-  }
-  function applyFY(records, dateField) {
-    if (fyFilter === 'all') return records;
-    return records.filter(r => inFY(r.fields[dateField]));
-  }
-  function toggleFY() {
-    fyFilter = fyFilter === 'current' ? 'all' : 'current';
-    document.querySelectorAll('.fy-toggle').forEach(btn => {
-      btn.textContent = fyFilter === 'current' ? 'FY 25/26' : 'All Time';
-      btn.classList.toggle('fy-active', fyFilter === 'current');
-    });
-    renderActiveTab();
-  }
 
   /* -- TYPOGRAPHY SCALE ---------------------------------------- */
   /* All non-KPI UI elements. .card-value/.card-label/.card-sub excluded. */
@@ -1049,6 +1022,35 @@ const AIRTABLE_CONFIG = {
   let quotes_sortCol = 'Quote Date';
   let quotes_sortDir = 'desc';
   let fyFilter = 'current';
+  // FY HELPERS
+  function getFYStart() {
+    const now = new Date();
+    const yr = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+    return new Date(yr, 6, 1);
+  }
+  function getFYEnd() {
+    const s = getFYStart();
+    return new Date(s.getFullYear() + 1, 5, 30, 23, 59, 59);
+  }
+  function inFY(dateStr) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    return d >= getFYStart() && d <= getFYEnd();
+  }
+  function applyFY(records, dateField) {
+    if (fyFilter === 'all') return records;
+    return records.filter(r => inFY(r.fields[dateField]));
+  }
+  function toggleFY() {
+    fyFilter = fyFilter === 'current' ? 'all' : 'current';
+    document.querySelectorAll('.fy-toggle').forEach(btn => {
+      btn.textContent = fyFilter === 'current' ? 'FY 25/26' : 'All Time';
+      btn.classList.toggle('fy-active', fyFilter === 'current');
+    });
+    renderActiveTab();
+  }
+  // FY HELPERS END
+
 
   // ── INIT ───────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
@@ -1400,9 +1402,10 @@ const AIRTABLE_CONFIG = {
   }
 
   function quotes_renderKPIs() {
-    const total = allQuotes.length;
-    const totalVal = allQuotes.reduce((s, r) => s + (r.fields['Quoted Value'] || r.fields['Active Quoted Value'] || 0), 0);
-    const sent = allQuotes.filter(r => r.fields['Quote Status'] === 'Sent').length;
+    const allQuotesFY = applyFY(allQuotes, 'Quote Date');
+    const total = allQuotesFY.length;
+    const totalVal = allQuotesFY.reduce((s, r) => s + (r.fields['Quoted Value'] || r.fields['Active Quoted Value'] || 0), 0);
+    const sent = allQuotesFY.filter(r => r.fields['Quote Status'] === 'Sent').length;
     const won = allQuotes.filter(r => r.fields['Quote Status'] === 'Won').length;
 
     const today = new Date(); today.setHours(0,0,0,0);
@@ -1411,7 +1414,7 @@ const AIRTABLE_CONFIG = {
       return d && new Date(d) < today && r.fields['Quote Status'] !== 'Won' && r.fields['Quote Status'] !== 'Lost';
     }).length;
 
-    const ages = allQuotes.map(r => r.fields['Quote Age'] || 0).filter(a => a > 0);
+    const ages = allQuotesFY.map(r => r.fields['Quote Age'] || 0).filter(a => a > 0);
     const avgAge = ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b) / ages.length) : 0;
 
     document.getElementById('quotes-kpiTotal').textContent = total;
@@ -1431,7 +1434,7 @@ const AIRTABLE_CONFIG = {
   }
 
   function quotes_renderTable() {
-    let filtered = allQuotes;
+    let filtered = applyFY(allQuotes, 'Quote Date');
 
     if (quotes_filter === 'Overdue') {
       const today = new Date(); today.setHours(0,0,0,0);
@@ -1637,7 +1640,7 @@ const AIRTABLE_CONFIG = {
         }
       }
 
-      if (status === 'confirmed' && !r.fields['Actual Ship Date']) {
+      if (status === 'confirmed' && !r.fields['Promised Ship Date']) {
         const val = r.fields['Order Value (USD)'] || 0;
         if (val > 50000) {
           items.push(`Large Order No Ship Date: ${esc(po)} (${esc(acct)}) — ${orders_fmtVal(val, 'USD')}`);
@@ -1795,7 +1798,7 @@ const AIRTABLE_CONFIG = {
     if (others.length > 0) {
       html += '<div class="panel-divider">Additional Fields</div>';
       others.forEach(k => {
-        if (f[k]) {
+        if (f[k] !== undefined && f[k] !== null && f[k] !== '') {
           const val = formatFieldValue(k, f[k]);
           html += `<div class="panel-field"><div class="panel-field-label">${esc(k)}</div><div class="panel-field-value">${val}</div></div>`;
         }
