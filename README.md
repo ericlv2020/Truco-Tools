@@ -6,11 +6,12 @@ Private repository for Truco International Limited — dashboards, scripts, and 
 
 ```
 truco-tools/
-├── config.js              # Airtable credentials (update API key here)
+├── .github/workflows/
+│   └── deploy.yml         # Injects the Airtable token from GitHub Secrets, deploys to Pages
+├── dashboard.html         # Commercial Engine overview
 ├── deal-dashboard.html    # Live deal & opportunity tracker
-├── quote-tracker.html     # Quote management & follow-up tracker
-├── scripts/               # Utility scripts (coming)
-└── templates/             # Document templates (coming)
+├── order-bank.html        # Order bank & FY financial summary
+└── quote-tracker.html     # Quote management & follow-up tracker
 ```
 
 ## Dashboards
@@ -31,18 +32,27 @@ Both dashboards pull live data from Airtable via the API.
 
 ## Setup
 
-### 1. Add your Airtable API key
+### 1. Airtable token (GitHub Secret)
 
-Open `config.js` and replace the placeholder:
+The Airtable Personal Access Token is **not** stored in the repo. It lives in the
+`AIRTABLE_TRUCO_TOOLS` GitHub Actions secret and is injected at deploy time.
+
+Each dashboard ships with a sentinel placeholder in its inline `AIRTABLE_CONFIG`:
 
 ```js
-apiKey: "YOUR_AIRTABLE_API_KEY_HERE"
+apiKey: "AIRTABLE_TOKEN_PLACEHOLDER"
 ```
 
-Get your key from: https://airtable.com/create/tokens
-Create a Personal Access Token with:
-- Scope: `data.records:read`
-- Access: your TI Commercial Engine base
+On every push to `main`, `.github/workflows/deploy.yml` replaces that sentinel in each
+HTML file with the secret's value, then publishes to GitHub Pages. (A verify step fails
+the build if any placeholder survives injection.)
+
+To set or rotate the token:
+1. Create a Personal Access Token at https://airtable.com/create/tokens
+   - Scope: `data.records:read`
+   - Access: your TI Commercial Engine base
+2. Update the `AIRTABLE_TRUCO_TOOLS` secret under repo Settings → Secrets and variables → Actions
+3. Push to `main` (or re-run the deploy workflow) to redeploy with the new token
 
 ### 2. Set up the GitHub repo
 
@@ -67,7 +77,7 @@ Your dashboards will be live at:
 ### 4. Security note
 
 The repo is **private** but GitHub Pages URLs are publicly accessible if someone has the link.
-The API key in `config.js` will be visible to anyone with the URL.
+The injected Airtable token is embedded in the published HTML, so it is visible to anyone with the URL.
 
 **Mitigation options:**
 - Use a read-only Airtable Personal Access Token (scoped to `data.records:read` only)
