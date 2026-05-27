@@ -16,19 +16,12 @@ truco-tools/
 
 ## Dashboards
 
-Both dashboards pull live data from Airtable via the API.
+All four dashboards pull live data from Airtable via the API:
 
-### Deal Dashboard (`deal-dashboard.html`)
-- Pipeline KPIs: active deals, total value, weighted value, overdue follow-ups
-- Full Opportunities table with stage filtering
-- Quotes table with status filtering
-- Color-coded by urgency
-
-### Quote Tracker (`quote-tracker.html`)
-- All quotes with sort, filter, and search
-- Overdue follow-up alerts
-- Summary cards by status
-- Sortable by any column
+- **`dashboard.html`** — Commercial Engine overview across opportunities, quotes, and orders
+- **`deal-dashboard.html`** — live deal & opportunity tracker with pipeline KPIs and stage filtering
+- **`quote-tracker.html`** — quote management & follow-up tracker with overdue alerts and sortable columns
+- **`order-bank.html`** — order bank with FY financial summary KPIs (Completed, Active, Total)
 
 ## Setup
 
@@ -54,25 +47,31 @@ To set or rotate the token:
 2. Update the `AIRTABLE_TRUCO_TOOLS` secret under repo Settings → Secrets and variables → Actions
 3. Push to `main` (or re-run the deploy workflow) to redeploy with the new token
 
-### 2. Set up the GitHub repo
+### 2. Fork or clone
+
+The repo already exists at https://github.com/ericlv2020/Truco-Tools — this step is for
+forking or cloning it, not initial setup.
 
 ```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin https://github.com/YOUR_USERNAME/truco-tools.git
-git push -u origin main
+git clone https://github.com/ericlv2020/Truco-Tools.git
 ```
 
 ### 3. Enable GitHub Pages
 
-1. Go to repo Settings → Pages
-2. Source: Deploy from branch → `main` → `/ (root)`
-3. Save
+The `deploy.yml` workflow publishes the site to the `gh-pages` branch (via peaceiris),
+which it **auto-creates on the first deploy** — you don't create it by hand. Point Pages
+at that branch, not `main`:
+
+1. Push to `main` once so the workflow runs and creates the `gh-pages` branch
+2. Go to repo Settings → Pages
+3. Source: Deploy from branch → `gh-pages` → `/ (root)`
+4. Save
 
 Your dashboards will be live at:
-- `https://YOUR_USERNAME.github.io/truco-tools/deal-dashboard.html`
-- `https://YOUR_USERNAME.github.io/truco-tools/quote-tracker.html`
+- `https://ericlv2020.github.io/Truco-Tools/dashboard.html`
+- `https://ericlv2020.github.io/Truco-Tools/deal-dashboard.html`
+- `https://ericlv2020.github.io/Truco-Tools/quote-tracker.html`
+- `https://ericlv2020.github.io/Truco-Tools/order-bank.html`
 
 ### 4. Security note
 
