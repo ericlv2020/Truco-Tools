@@ -21,6 +21,13 @@ jobs:
           sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_TRUCO_TOOLS }}/g' dashboard.html
           sed -i 's/AIRTABLE_TOKEN_PLACEHOLDER/${{ secrets.AIRTABLE_CLAUDE_INTEGRATION }}/g' config.js
 
+      - name: Verify token injection
+        run: |
+          if grep -l 'AIRTABLE_TOKEN_PLACEHOLDER' deal-dashboard.html quote-tracker.html order-bank.html dashboard.html; then
+            echo "::error::AIRTABLE_TOKEN_PLACEHOLDER still present in the file(s) above after injection — the sentinel is missing or misspelled. Aborting deploy."
+            exit 1
+          fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
